@@ -1,0 +1,53 @@
+html {
+  background: url(Whatapp_background.png) no-repeat center fixed;
+  background-size: cover;
+  color: #0e689c;
+  font-size: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: green;
+  background-color: #c2ccc5;
+  padding: 20px;
+  border: 1px solid black;
+}
+h2 {
+  text-align: center;
+  color: green;
+}
+h3 {
+  color: green;
+  position: relative;
+  left: 100px;
+}
+p {
+  position: relative;
+  left: 100px;
+}
+ol {
+    position: relative;
+    left: 100px;
+}
+#msg_stats_table {
+    position: relative;
+    left: 120px;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 40%;
+}
+#msg_stats_table td, #msg_stats_table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+#msg_stats_table tr:nth-child(even){background-color: #f2f2f2;}
+
+#msg_stats_table tr:hover {background-color: #ddd;}
+
+#msg_stats_table th {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}

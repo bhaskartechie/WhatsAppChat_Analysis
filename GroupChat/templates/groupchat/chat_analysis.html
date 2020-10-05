@@ -1,0 +1,27 @@
+{%extends "base.html" %}
+
+{% block content %}
+<h2 style="text-align:center;"><strong>{{group_name}}</strong></h2>
+<p> Group created by <strong>"{{creator}}"</strong> with group name <strong>"{{group_name}}"</strong> on
+    <strong>{{first_date}} {{first_time}}</strong></p>
+<h3>Group members({{authors|length}})</h3>
+<ol>
+{% for author in authors %}
+    <li>{{ author}}</li>
+{% endfor %}
+</ol>
+<h3>Group statistics</h3>
+<table id="msg_stats_table">
+  <tr>
+    <th>Parameter</th>
+    <th>Value</th>
+  </tr>
+    {% for key, value in msg_statistics.items %}
+  <tr>
+    <td>{{key}}</td>
+    <td>{{value}}</td>
+  </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

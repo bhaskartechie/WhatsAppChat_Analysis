@@ -90,27 +90,17 @@ def chat_analysis_main(filename):
             else:
                 message_buffer.append(line)
         parsed_data.append([date, time, author, ' '.join(message_buffer)])
-
-    data_frame = pd.DataFrame(parsed_data, columns=['Date', 'Time', 'Author', 'Message'])  # Initialising a pandas Dataframe.
+    # Initialising a pandas Dataframe.
+    data_frame = pd.DataFrame(parsed_data, columns=['Date', 'Time', 'Author', 'Message'])
     data_frame["Date"] = pd.to_datetime(data_frame["Date"])
-    # data_frame["Date"] = pd.to_datetime(data_frame["Date"] + " " + data_frame["Time"])
-    # del data_frame["Time"]
-    total_messages = data_frame.shape[0]
-    media_messages = data_frame[data_frame['Message'] == '<Media omitted>'].shape[0]
 
     data_frame["emoji"] = data_frame["Message"].apply(split_count)
-    emojis = sum(data_frame['emoji'].str.len())
     url_pattern = r'(https?://\S+)'
     data_frame['urlcount'] = data_frame.Message.apply(lambda x: re.findall(url_pattern, x)).str.len()
-    links = np.sum(data_frame.urlcount)
     media_messages_df = data_frame[data_frame['Message'] == '<Media omitted>']
     messages_df = data_frame.drop(media_messages_df.index)
     messages_df['Letter_Count'] = messages_df['Message'].apply(lambda s: len(s))
     messages_df['Word_Count'] = messages_df['Message'].apply(lambda s: len(s.split(' ')))
-
-    # Creates a list of unique Authors
-    authors = messages_df.Author.unique()
-    authors = authors[authors != None]
 
     return data_frame, messages_df
 
@@ -199,3 +189,4 @@ def chat_analysis_main(filename):
 # plt.xlabel('Number of messages')
 # plt.ylabel('Time')
 # plt.show()
+

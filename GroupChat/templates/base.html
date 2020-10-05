@@ -1,11 +1,17 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Chat Analysis</title>
+    <link href="{% static "css/WhatsApp.css" %}" rel="stylesheet">
 </head>
 <body>
-<h1> Hello world</h1>
-<p> Group created by "{{creator}}" with group name "{{group_name}}" on {{first_date}} {{first_time}}</p>
+    <h1>WHATSAPP GROUP CHAT DATA ANALYSIS</h1>
+<div id="content">
+    {% block content %}
+    {% endblock %}
+</div>
+
 </body>
 </html>
