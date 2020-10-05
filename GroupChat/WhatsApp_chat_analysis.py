@@ -102,8 +102,32 @@ def chat_analysis_main(filename):
     messages_df = data_frame.drop(media_messages_df.index)
     messages_df['Letter_Count'] = messages_df['Message'].apply(lambda s: len(s))
     messages_df['Word_Count'] = messages_df['Message'].apply(lambda s: len(s.split(' ')))
+    # get group members
+    authors = messages_df.Author.unique()
+    authors = authors[authors != None]  # remove None author
 
-    return data_frame, messages_df
+    author_range = range(len(authors))
+    # Average typing speed in mobile, actual reference is 38
+    avg_typing_speed = 25
+    # individual each member data
+    author_msgs = [messages_df[messages_df["Author"] == authors[writer]] for writer in author_range]
+    # individual messages count of the each member in list
+    num_msgs = [author_msgs[i].shape[0] for i in author_range]
+    # individual average word count of the each member in list
+    avg_words_msg = [round((np.sum(author_msgs[i]['Word_Count'])) / author_msgs[i].shape[0], 2) for i in author_range]
+    # individual time spent in min of the each member in list
+    total_time_spent_min = [round((np.sum(author_msgs[i]['Word_Count'])) / avg_typing_speed, 2) for i in author_range]
+    # individual emojies count of the each member in list
+    num_emojis = [sum(author_msgs[i]['emoji'].str.len()) for i in author_range]
+    # individual urls sent of the each member in list
+    num_urls = [sum(author_msgs[i]['urlcount']) for i in author_range]
+    # individual media messages count of the each member in list
+    media_msg = [media_messages_df[media_messages_df['Author'] == authors[i]].shape[0] for i in author_range]
+    # creating dictionary with authors key and derived values from above
+    member_stats = {author: [msg, emoji, urls, media, words, time] for author, msg, emoji, urls, media, words, time in
+                    zip(authors, num_msgs, num_emojis, num_urls, media_msg, avg_words_msg, total_time_spent_min)}
+    # member_stats['authors'] = authors
+    return data_frame, messages_df, member_stats
 
 #     for writer in range(len(authors)):
 #         # Filtering out messages of particular user

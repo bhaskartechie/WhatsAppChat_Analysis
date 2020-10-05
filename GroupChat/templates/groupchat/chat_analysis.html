@@ -23,5 +23,25 @@
   </tr>
     {% endfor %}
 </table>
+<h3>Member statistics</h3>
+<table id="member_stats_table">
+  <tr>
+    <th>Name</th>
+    <th>Text messages</th>
+    <th>Emojies</th>
+    <th>Links shared</th>
+    <th>Media Files</th>
+    <th>Average words per message</th>
+    <th>Total Time spent(min)</th>
+  </tr>
+    {% for key, value in member_stats.items %}
+  <tr>
+    <td>{{key}}</td>
+      {% for v in value %}
+        <td>{{v}}</td>
+      {% endfor %}
+  </tr>
+    {% endfor %}
+</table>
 
 {% endblock %}

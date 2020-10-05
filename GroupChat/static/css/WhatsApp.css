@@ -29,6 +29,7 @@ ol {
     position: relative;
     left: 100px;
 }
+/*  group statistics table*/
 #msg_stats_table {
     position: relative;
     left: 120px;
@@ -41,10 +42,33 @@ ol {
   padding: 8px;
 }
 #msg_stats_table tr:nth-child(even){background-color: #f2f2f2;}
-
 #msg_stats_table tr:hover {background-color: #ddd;}
 
 #msg_stats_table th {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
+
+/*  group member statistics table*/
+#member_stats_table {
+    position: relative;
+    left: 120px;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 40%;
+}
+#member_stats_table td, #member_stats_table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+#member_stats_table tr:nth-child(even){background-color: #f2f2f2;}
+
+#member_stats_table tr:hover {background-color: #ddd;}
+
+#member_stats_table th {
   padding-top: 10px;
   padding-bottom: 10px;
   text-align: left;
