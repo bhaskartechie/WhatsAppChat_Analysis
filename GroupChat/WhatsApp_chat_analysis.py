@@ -93,7 +93,8 @@ def chat_analysis_main(filename):
     # Initialising a pandas Dataframe.
     data_frame = pd.DataFrame(parsed_data, columns=['Date', 'Time', 'Author', 'Message'])
     data_frame["Date"] = pd.to_datetime(data_frame["Date"])
-
+    data_frame['Date'] = data_frame['Date'].dt.strftime('%d/%m/%Y')
+    data_frame["Date"] = pd.to_datetime(data_frame["Date"])
     data_frame["emoji"] = data_frame["Message"].apply(split_count)
     url_pattern = r'(https?://\S+)'
     data_frame['urlcount'] = data_frame.Message.apply(lambda x: re.findall(url_pattern, x)).str.len()
