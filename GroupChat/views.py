@@ -16,6 +16,26 @@ def create_local_chat_file(fd):
     return chat_filename
 
 
+def find_group_name(df):
+    # this key term used to find the changes in the group name
+    key_terms = 'changed the subject from '
+    data_frame = df[df["Message"].str.contains(key_terms)]
+    if data_frame.empty:
+        return [df["Message"].str.findall('"([^"]*)"')[0]]
+    # find the string between from and to strings
+    first_str_pre = 'from "'
+    first_str_post = '" to'
+    second_str_pre = 'to "'
+    second_str_post = '"'
+    filt = lambda s: [s[s.find(first_str_pre) + len(first_str_pre):s.rfind(first_str_post)],\
+                             s[s.find(second_str_pre) + len(second_str_pre):s.rfind(second_str_post)]]
+
+    # filt_2 = lambda s: s[s.find(second_str_pre) + len(second_str_pre):s.rfind(second_str_post)]
+    temp_df = data_frame["Message"].apply(filt)
+    # remove empty list from the none data frame
+    return temp_df[temp_df.astype(bool)].to_list()
+
+
 # Create your views here.
 def home(request):
     if request.method == 'POST' and request.FILES['chat_file']:
@@ -29,6 +49,8 @@ def home(request):
         first_time = data_frame['Time'][0]
         group_name = re.findall(r'\"(.*?)\"', first_msg)[0]
         creator = re.findall(r'\w+', first_msg)[0]
+        # get None author data, it is special author for group operations
+        none_data = messages_df[messages_df["Author"].isnull()]
         authors = messages_df.Author.unique()
         authors = authors[authors != None]
 
@@ -36,16 +58,22 @@ def home(request):
         emojis = sum(data_frame['emoji'].str.len())
         links = np.sum(data_frame.urlcount)
         media_messages = data_frame[data_frame['Message'] == '<Media omitted>'].shape[0]
+        group_names = find_group_name(none_data)
+        first_group_name = group_names[0][0]
+        if len(group_names) == 1:
+            present_group_name = first_group_name
+        else:
+            present_group_name = group_names[-1][1]
 
         msg_statistics = {'Total messages': total_messages,
                           'Media messages': media_messages,
                           'Total Emojis': emojis,
-                          'Total links': links,
-                          }
+                          'Total links': links, }
         return render(request, 'groupchat/chat_analysis.html', {'first_msg': first_msg,
                                                                 'first_date': first_date,
                                                                 'first_time': first_time,
-                                                                'group_name': group_name,
+                                                                'first_group_name': first_group_name,
+                                                                'present_group_name': present_group_name,
                                                                 'creator': creator,
                                                                 'authors': authors,
                                                                 'msg_statistics': msg_statistics,
