@@ -16,9 +16,17 @@ def create_local_chat_file(fd):
     return chat_filename
 
 
-def find_group_name(df):
+# function to count the number of times group dp changed
+def group_dp_changes(df):
+    key_term_icon = 'this group\'s icon'
+    return df[df["Message"].str.contains(key_term_icon)].shape[0]
+
+
+# function to count the number of times group name changed
+def group_name_changes(df):
     # this key term used to find the changes in the group name
     key_terms = 'changed the subject from '
+    key_term_icon = 'this group\'s icon'
     data_frame = df[df["Message"].str.contains(key_terms)]
     if data_frame.empty:
         filt = lambda s: [s[0:s.find(' created')], s[s.find('created group "') + len('created group "'):s.rfind('"')]]
@@ -55,12 +63,13 @@ def home(request):
         none_data = messages_df[messages_df["Author"].isnull()]
         authors = messages_df.Author.unique()
         authors = authors[authors != None]
-
         total_messages = data_frame.shape[0]
         emojis = sum(data_frame['emoji'].str.len())
         links = np.sum(data_frame.urlcount)
         media_messages = data_frame[data_frame['Message'] == '<Media omitted>'].shape[0]
-        group_names = find_group_name(none_data)
+        # function to find the number changes in the group names
+        group_names = group_name_changes(none_data)
+        dps_changes = group_dp_changes(none_data)
         first_group_name = group_names[0][1]
         if len(group_names) == 1:
             present_group_name = first_group_name
@@ -78,6 +87,7 @@ def home(request):
                                                                 'present_group_name': present_group_name,
                                                                 'creator': creator,
                                                                 'authors': authors,
+                                                                'dps_changes': dps_changes,
                                                                 'msg_statistics': msg_statistics,
                                                                 'group_names': group_names,
                                                                 'member_stats': member_stats, })
