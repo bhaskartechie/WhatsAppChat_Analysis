@@ -17,9 +17,20 @@ def create_local_chat_file(fd):
 
 
 # function to count the number of times group dp changed
-def group_dp_changes(df):
+def group_dp_changes(df, date, created_by):
+    # this i the key term to check in the dataframe
     key_term_icon = 'this group\'s icon'
-    return df[df["Message"].str.contains(key_term_icon)].shape[0]
+    icon_changes = df[df["Message"].str.contains(key_term_icon)]
+    # total number of changes
+    num_changes = icon_changes.shape[0]
+    if num_changes > 0:
+        # last dp changed date by getting last column of the searched data frame
+        last_change = icon_changes['Date'].dt.date.iloc[-1]
+        # last dp changed author by getting last column of the searched data frame
+        last_change_by = icon_changes['Message'].iloc[[-1]].str.rsplit(' changed').to_list()[0][0]
+        return num_changes, last_change, last_change_by
+    else:
+        return num_changes, date, created_by
 
 
 # function to count the number of times group name changed
@@ -69,7 +80,7 @@ def home(request):
         media_messages = data_frame[data_frame['Message'] == '<Media omitted>'].shape[0]
         # function to find the number changes in the group names
         group_names = group_name_changes(none_data)
-        dps_changes = group_dp_changes(none_data)
+        num_dp_changes, dp_last_change, dp_last_change_by = group_dp_changes(none_data, first_date, creator)
         first_group_name = group_names[0][1]
         if len(group_names) == 1:
             present_group_name = first_group_name
@@ -80,6 +91,7 @@ def home(request):
                           'Media messages': media_messages,
                           'Total Emojis': emojis,
                           'Total links': links, }
+        dp_changes = (num_dp_changes, dp_last_change, dp_last_change_by)
         return render(request, 'groupchat/chat_analysis.html', {'first_msg': first_msg,
                                                                 'first_date': first_date,
                                                                 'first_time': first_time,
@@ -87,7 +99,7 @@ def home(request):
                                                                 'present_group_name': present_group_name,
                                                                 'creator': creator,
                                                                 'authors': authors,
-                                                                'dps_changes': dps_changes,
+                                                                'dp_changes': dp_changes,
                                                                 'msg_statistics': msg_statistics,
                                                                 'group_names': group_names,
                                                                 'member_stats': member_stats, })

@@ -32,14 +32,14 @@
   {% if group_names|length > 1 %}
   {% for grp_name in group_names %}
       <li>
-        "{{grp_name.0}}" changed <font color="grey" >{{grp_name.1}} </font><span style='font-size:30px; color: green;'>&#8680;</span><font color="#8334eb" >{{grp_name.2}} </font>
+        <font color="#EBB828">{{grp_name.0}}</font> changed <font color="grey" >{{grp_name.1}} </font><span style='font-size:30px; color: black;'>&#8680;</span><font color="#8334eb" >{{grp_name.2}} </font>
       </li>
   {% endfor %}
   {% else %}
   <strong>No group name changes</strong>
 {% endif %}
-  <hr style="width:50%;text-align:left;margin-left:0;color:green;">
-  <span style='font-size:50px; color: red;'>&#128247;</span><font color="green">Group DP changed: </font><font size="10px" color="red">{{dps_changes}}</font><strong></strong> time(s)
+  <hr style="width:50%;text-align:left;margin-left:0;">
+  <span style='font-size:50px; color: red;'>&#128247;</span><font color="green">Group DP changed: </font><font size="10px" color="red">{{dp_changes.0}}</font><strong></strong> time(s), <font color="grey" size="2px"><i>last change on {{dp_changes.1}} by {{dp_changes.2}}</i></font>
 </ul>
 
 <h3>Member statistics</h3>
