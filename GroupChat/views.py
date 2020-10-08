@@ -21,15 +21,16 @@ def find_group_name(df):
     key_terms = 'changed the subject from '
     data_frame = df[df["Message"].str.contains(key_terms)]
     if data_frame.empty:
-        filt = lambda s: s[s.find('created group "') + len('created group "'):s.rfind('"')]
-        return [[df["Message"].apply(filt)[0]]]
+        filt = lambda s: [s[0:s.find(' created')], s[s.find('created group "') + len('created group "'):s.rfind('"')]]
+        return [df["Message"].apply(filt)[0]]
     # find the string between from and to strings
     first_str_pre = 'from "'
     first_str_post = '" to'
     second_str_pre = 'to "'
     second_str_post = '"'
-    filt = lambda s: [s[s.find(first_str_pre) + len(first_str_pre):s.rfind(first_str_post)], \
-                      s[s.find(second_str_pre) + len(second_str_pre):s.rfind(second_str_post)]]
+    filt = lambda s: [s[0:s.find(' changed the subject')], s[s.find(first_str_pre) +
+                       len(first_str_pre):s.rfind(first_str_post)], s[s.find(second_str_pre) +
+                       len(second_str_pre):s.rfind(second_str_post)]]
 
     # filt_2 = lambda s: s[s.find(second_str_pre) + len(second_str_pre):s.rfind(second_str_post)]
     temp_df = data_frame["Message"].apply(filt)
@@ -60,11 +61,11 @@ def home(request):
         links = np.sum(data_frame.urlcount)
         media_messages = data_frame[data_frame['Message'] == '<Media omitted>'].shape[0]
         group_names = find_group_name(none_data)
-        first_group_name = group_names[0][0]
+        first_group_name = group_names[0][1]
         if len(group_names) == 1:
             present_group_name = first_group_name
         else:
-            present_group_name = group_names[-1][1]
+            present_group_name = group_names[-1][2]
 
         msg_statistics = {'Total messages': total_messages,
                           'Media messages': media_messages,
@@ -78,6 +79,7 @@ def home(request):
                                                                 'creator': creator,
                                                                 'authors': authors,
                                                                 'msg_statistics': msg_statistics,
+                                                                'group_names': group_names,
                                                                 'member_stats': member_stats, })
 
     # else:

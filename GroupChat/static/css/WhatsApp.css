@@ -75,27 +75,8 @@ ol {
   background-color: #4CAF50;
   color: white;
 }
-.upload-btn-wrapper {
-  position: relative;
-  overflow: hidden;
-  display: inline-block;
-}
-
-.btn {
-  border: 2px solid gray;
-  color: white;
-  background-color: green;
-  padding: 10px 80px;
-  border-radius: 8px;
-  font-size: 30px;
-  font-weight: bold;
-  display: flex;
-}
-
-.upload-btn-wrapper input[type=file] {
-  font-size: 100px;
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: 0;
+#list_ul {
+    position: relative;
+    left: 100px;
+    list-style-type:none;
 }
