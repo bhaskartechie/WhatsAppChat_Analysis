@@ -57,6 +57,34 @@ def group_name_changes(df):
     return temp_df[temp_df.astype(bool)].to_list()
 
 
+# this function finds the active and left members from the group
+def find_active_members(df, authors):
+    # authors.append('You')
+    member_activities = df[df['Message'].str.findall('left|added|removed').astype(bool)]
+    active_members = []
+    left_members = []
+    for author in authors:
+        activity = member_activities['Message'].str.split(author)
+        if any(activity.apply(lambda s: len(s) > 1)):
+            acts = activity[activity.apply(lambda s: len(s) > 1)]
+            # check last activity
+            # author_act = acts.iloc[[-1]].str.find('added')
+            # if not author_act.isna():
+            cond_1 = any('left' in s for s in acts.iloc[-1])
+
+            cond_2 = any(f'removed {author}' in s for s in acts.iloc[-1])
+            if cond_1 or cond_2:
+                # activity[author_act.index[-1]][0]
+                # if any('added' in s for s in activity[author_act.index[-1]]):
+                # if sum(acts.apply(lambda x: int(x[0] == ''))) < sum(acts.apply(lambda x: int(x[1] == ''))):
+                left_members.append(author)
+            else:
+                active_members.append(author)
+        else:
+            active_members.append(author)
+    return active_members, left_members
+
+
 # Create your views here.
 def home(request):
     if request.method == 'POST' and request.FILES['chat_file']:
@@ -68,7 +96,7 @@ def home(request):
         first_msg = data_frame['Message'][0]
         first_date = data_frame['Date'][0].date()
         first_time = data_frame['Time'][0]
-        group_name = re.findall(r'\"(.*?)\"', first_msg)[0]
+        # group_name = re.findall(r'\"(.*?)\"', first_msg)[0]
         creator = re.findall(r'\w+', first_msg)[0]
         # get None author data, it is special author for group operations
         none_data = messages_df[messages_df["Author"].isnull()]
@@ -80,7 +108,10 @@ def home(request):
         media_messages = data_frame[data_frame['Message'] == '<Media omitted>'].shape[0]
         # function to find the number changes in the group names
         group_names = group_name_changes(none_data)
+        # function to find the number changes in the group dps
         num_dp_changes, dp_last_change, dp_last_change_by = group_dp_changes(none_data, first_date, creator)
+        #
+        active_members, left_members = find_active_members(none_data, authors)
         first_group_name = group_names[0][1]
         if len(group_names) == 1:
             present_group_name = first_group_name
@@ -91,7 +122,9 @@ def home(request):
                           'Media messages': media_messages,
                           'Total Emojis': emojis,
                           'Total links': links, }
+        # put all outs of the the dp activities
         dp_changes = (num_dp_changes, dp_last_change, dp_last_change_by)
+        group_members = (active_members, left_members)
         return render(request, 'groupchat/chat_analysis.html', {'first_msg': first_msg,
                                                                 'first_date': first_date,
                                                                 'first_time': first_time,
@@ -99,6 +132,7 @@ def home(request):
                                                                 'present_group_name': present_group_name,
                                                                 'creator': creator,
                                                                 'authors': authors,
+                                                                'group_members': group_members,
                                                                 'dp_changes': dp_changes,
                                                                 'msg_statistics': msg_statistics,
                                                                 'group_names': group_names,

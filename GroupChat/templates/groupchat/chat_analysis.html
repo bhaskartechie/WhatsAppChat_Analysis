@@ -4,11 +4,14 @@
 <h2 style="text-align:center;"><strong>{{present_group_name}}</strong></h2>
 <p> Group created by <strong>"{{creator}}"</strong> with group name <strong>"{{first_group_name}}"</strong> on
     <strong>{{first_date}} {{first_time}}</strong></p>
-<h3>Group members({{authors|length}})</h3>
+<h3>Group members({{group_members.0|length}})</h3>
 <ol>
-{% for author in authors %}
-    <li>{{ author}}</li>
-{% endfor %}
+  {% for author in group_members.0 %}
+      <li>{{ author }}</li>
+  {% endfor %}
+  {% for author in group_members.1 %}
+      <font color="red"><li>{{ author }}</li></font>
+  {% endfor %}
 </ol>
 <h3>Group statistics</h3>
 <table id="msg_stats_table">
