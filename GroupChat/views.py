@@ -3,7 +3,6 @@ from django.http import HttpResponse
 from .WhatsApp_chat_analysis import chat_analysis_main
 import re
 import numpy as np
-from .forms import UploadChatFileForm
 from django.conf import settings
 import os
 
@@ -37,7 +36,6 @@ def group_dp_changes(df, date, created_by):
 def group_name_changes(df):
     # this key term used to find the changes in the group name
     key_terms = 'changed the subject from '
-    key_term_icon = 'this group\'s icon'
     data_frame = df[df["Message"].str.contains(key_terms)]
     if data_frame.empty:
         filt = lambda s: [s[0:s.find(' created')], s[s.find('created group "') + len('created group "'):s.rfind('"')]]
