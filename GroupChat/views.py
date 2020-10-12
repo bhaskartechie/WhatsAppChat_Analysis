@@ -70,7 +70,6 @@ def find_active_members(df, authors):
         keyword_added).apply(lambda x: x.pop(1))
     # replace 'and' with ',' so that it will easier to get list
     added_persons = added_persons.str.replace('and', ',')
-
     # split list elements by ',' and convert to the list, its list of list elemets
     authors_list_of_lists = added_persons.str.split(',').to_list()
     # flatten list by striping strings
@@ -78,6 +77,8 @@ def find_active_members(df, authors):
                     for sublist in authors_list_of_lists for item in sublist]
     # remove any nulls
     authors_list = list(filter(None, authors_list))
+    # get only unique others out of added mutliple times
+    authors_list = list(set(authors_list))
 
     # ---------this snippet for the string "joined using this" search
     keyword_link = 'joined using this'
@@ -86,7 +87,10 @@ def find_active_members(df, authors):
     link_joining = link_joining.str.rsplit(
         keyword_link).apply(lambda x: x.pop(0)).to_list()
     joined_by_link = [s.strip() for s in link_joining]
+    # get only unique others out of added mutliple times by link
+    joined_by_link = list(set(joined_by_link))
 
+    # TODO: need to get admin if you were added
     # checking for the condition "was added"
     keyword_was = 'was added'
     if any(added_persons == ''):
@@ -94,7 +98,9 @@ def find_active_members(df, authors):
         was_added = added_memebers[empty_ind]
         was_added = was_added.str.rsplit(
             keyword_was).apply(lambda x: x.pop(0)).to_list()
-        authors_list.extend(was_added)
+        # it is to check the "You were added"  adding number
+        if not any('You' in s for s in was_added):
+            authors_list.extend(was_added)
 
     # combine all extracted contacts to single list
     authors_list.extend(joined_by_link)
@@ -108,6 +114,8 @@ def find_active_members(df, authors):
     l_m = left_mem.str.rsplit(
         keyword_left).apply(lambda x: x.pop(0)).to_list()
     left_mem = [s.strip() for s in l_m]  # strimming list elemets
+    # get only unique others out of left mutliple times
+    left_mem = list(set(left_mem))
 
     # get the vlues which contains "removed" keyword for removed members
     keyword_removed = 'removed'
@@ -117,6 +125,8 @@ def find_active_members(df, authors):
     r_m = rem_members.str.rsplit(
         keyword_removed).apply(lambda x: x.pop(1)).to_list()
     rem_members = [s.strip() for s in r_m]  # strimming list elemets
+    # get only unique others out of removed mutliple times
+    rem_members = list(set(rem_members))
 
     left_members = []
     removed_members = []
@@ -148,7 +158,8 @@ def find_active_members(df, authors):
     all_memebers = np.unique(active_members + joined_by_link +
                              rem_members + left_mem)
     # remove "you" author
-    all_memebers = np.delete(all_memebers, np.where(all_memebers == 'you'))
+    all_memebers = np.delete(all_memebers, np.where(
+        [all_memebers == 'you', all_memebers == 'You']))
     active_members = np.setdiff1d(all_memebers, left_members + removed_members)
     group_members = (active_members.tolist(),
                      left_members,

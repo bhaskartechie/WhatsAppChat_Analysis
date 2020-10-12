@@ -35,7 +35,7 @@ ol {
   left: 120px;
   font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
   border-collapse: collapse;
-  width: 40%;
+  width: 100%;
 }
 #msg_stats_table td,
 #msg_stats_table th {
