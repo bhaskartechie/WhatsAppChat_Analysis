@@ -1,23 +1,20 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Chat Analysis</title>
     <link href="{% static "css/WhatsApp.css" %}" rel="stylesheet">
-</head>
-
-<body>
+  </head>
+  <body>
     <h1>WHATSAPP GROUP CHAT DATA ANALYSIS</h1>
-     <form method="post" enctype="multipart/form-data">
-         {% csrf_token %}
-        <input type="file" name="chat_file" >
-        <button type="submit" style="width:200px; color: green;background" >Upload</button>
-     </form>
-<div id="content">
-    {% block content %}
-    {% endblock %}
-</div>
-
-</body>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="file" name="chat_file" />
+      <button type="submit" style="width:200px; color: green;background">
+        Upload
+      </button>
+    </form>
+    <div id="content">{% block content %} {% endblock %}</div>
+  </body>
 </html>
