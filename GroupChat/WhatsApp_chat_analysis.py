@@ -23,7 +23,8 @@ def starts_with_date_and_time(s):
 def find_author(s):
     patterns = ['([\w]+):',  # First Name
                 '([\w]+[\s]+[\w]+):',  # First Name + Last Name
-                '([\w]+[\s]+[\w]+[\s]+[\w]+):',  # First Name + Middle Name + Last Name
+                # First Name + Middle Name + Last Name
+                '([\w]+[\s]+[\w]+[\s]+[\w]+):',
                 '([+]\d{2} \d{5} \d{5}):',  # Mobile Number (India)
                 '([+]\d{2} \d{3} \d{3} \d{4}):',  # Mobile Number (US)
                 '([\w]+)[\u263a-\U0001f999]+:', ]  # Name and Emoji
@@ -40,12 +41,13 @@ def get_data_point(current_line):
     date_time = split_line[0]
     date_from_line, time_from_line = date_time.split(', ')
     message_from_line = ' '.join(split_line[1:])
-    if find_author(message_from_line):
-        split_message = message_from_line.split(': ')
+    split_message = message_from_line.split(': ')
+    if len(split_message) > 1:
         author_from_line = split_message[0]
         message_from_line = ' '.join(split_message[1:])
     else:
         author_from_line = None
+
     return date_from_line, time_from_line, author_from_line, message_from_line
 
 
@@ -60,7 +62,8 @@ def split_count(text):
 
 
 def dayofweek(day):
-    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    days = ["Monday", "Tuesday", "Wednesday",
+            "Thursday", "Friday", "Saturday", "Sunday"]
     return days[day]
 
 
@@ -83,7 +86,8 @@ def chat_analysis_main(filename):
             line = line.strip()
             if starts_with_date_and_time(line):
                 if len(message_buffer) > 0:
-                    parsed_data.append([date, time, author, ' '.join(message_buffer)])
+                    parsed_data.append(
+                        [date, time, author, ' '.join(message_buffer)])
                 message_buffer.clear()
                 date, time, author, message = get_data_point(line)
                 message_buffer.append(message)
@@ -91,17 +95,21 @@ def chat_analysis_main(filename):
                 message_buffer.append(line)
         parsed_data.append([date, time, author, ' '.join(message_buffer)])
     # Initialising a pandas Dataframe.
-    data_frame = pd.DataFrame(parsed_data, columns=['Date', 'Time', 'Author', 'Message'])
+    data_frame = pd.DataFrame(parsed_data, columns=[
+                              'Date', 'Time', 'Author', 'Message'])
     data_frame["Date"] = pd.to_datetime(data_frame["Date"])
     data_frame['Date'] = data_frame['Date'].dt.strftime('%d/%m/%Y')
     data_frame["Date"] = pd.to_datetime(data_frame["Date"])
     data_frame["emoji"] = data_frame["Message"].apply(split_count)
     url_pattern = r'(https?://\S+)'
-    data_frame['urlcount'] = data_frame.Message.apply(lambda x: re.findall(url_pattern, x)).str.len()
+    data_frame['urlcount'] = data_frame.Message.apply(
+        lambda x: re.findall(url_pattern, x)).str.len()
     media_messages_df = data_frame[data_frame['Message'] == '<Media omitted>']
     messages_df = data_frame.drop(media_messages_df.index)
-    messages_df['Letter_Count'] = messages_df['Message'].apply(lambda s: len(s))
-    messages_df['Word_Count'] = messages_df['Message'].apply(lambda s: len(s.split(' ')))
+    messages_df['Letter_Count'] = messages_df['Message'].apply(
+        lambda s: len(s))
+    messages_df['Word_Count'] = messages_df['Message'].apply(
+        lambda s: len(s.split(' ')))
     # get group members
     authors = messages_df.Author.unique()
     authors = authors[authors != None]  # remove None author
@@ -110,19 +118,23 @@ def chat_analysis_main(filename):
     # Average typing speed in mobile, actual reference is 38
     avg_typing_speed = 25
     # individual each member data
-    author_msgs = [messages_df[messages_df["Author"] == authors[writer]] for writer in author_range]
+    author_msgs = [messages_df[messages_df["Author"] == authors[writer]]
+                   for writer in author_range]
     # individual messages count of the each member in list
     num_msgs = [author_msgs[i].shape[0] for i in author_range]
     # individual average word count of the each member in list
-    avg_words_msg = [round((np.sum(author_msgs[i]['Word_Count'])) / author_msgs[i].shape[0], 2) for i in author_range]
+    avg_words_msg = [round((np.sum(author_msgs[i]['Word_Count'])) /
+                           author_msgs[i].shape[0], 2) for i in author_range]
     # individual time spent in min of the each member in list
-    total_time_spent_min = [round((np.sum(author_msgs[i]['Word_Count'])) / avg_typing_speed, 2) for i in author_range]
+    total_time_spent_min = [round(
+        (np.sum(author_msgs[i]['Word_Count'])) / avg_typing_speed, 2) for i in author_range]
     # individual emojies count of the each member in list
     num_emojis = [sum(author_msgs[i]['emoji'].str.len()) for i in author_range]
     # individual urls sent of the each member in list
     num_urls = [sum(author_msgs[i]['urlcount']) for i in author_range]
     # individual media messages count of the each member in list
-    media_msg = [media_messages_df[media_messages_df['Author'] == authors[i]].shape[0] for i in author_range]
+    media_msg = [media_messages_df[media_messages_df['Author']
+                                   == authors[i]].shape[0] for i in author_range]
     # creating dictionary with authors key and derived values from above
     member_stats = {author: [msg, emoji, urls, media, words, time] for author, msg, emoji, urls, media, words, time in
                     zip(authors, num_msgs, num_emojis, num_urls, media_msg, avg_words_msg, total_time_spent_min)}
@@ -214,4 +226,3 @@ def chat_analysis_main(filename):
 # plt.xlabel('Number of messages')
 # plt.ylabel('Time')
 # plt.show()
-

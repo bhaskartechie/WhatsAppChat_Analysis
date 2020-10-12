@@ -151,7 +151,7 @@ def find_active_members(df, authors):
             else:
                 active_members.append(author)
         else:
-            active_members.extend(author)
+            active_members.append(author)
     active_members.extend(authors_list)
     # active_members = np.setdiff1d(active_members, inacctive_members)
     # get all authors by applying unique
