@@ -188,6 +188,7 @@ def home(request):
         total_messages = data_frame.shape[0]
         emojis = sum(data_frame['emoji'].str.len())
         links = np.sum(data_frame.urlcount)
+        deleted_messages = np.sum(messages_df.Deleted)
         media_messages = data_frame[data_frame['Message']
                                     == '<Media omitted>'].shape[0]
         # function to find the number changes in the group names
@@ -207,7 +208,8 @@ def home(request):
         msg_statistics = {'Total messages': total_messages,
                           'Media messages': media_messages,
                           'Total Emojis': emojis,
-                          'Total links': links, }
+                          'Total links': links,
+                          'Total deleted messages': deleted_messages, }
         # put all outs of the the dp activities
         dp_changes = (num_dp_changes, dp_last_change, dp_last_change_by)
         return render(request, 'groupchat/chat_analysis.html', {'first_msg': first_msg,

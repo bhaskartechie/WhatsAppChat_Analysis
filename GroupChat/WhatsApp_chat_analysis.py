@@ -20,20 +20,20 @@ def starts_with_date_and_time(s):
 
 
 # Finds username of any given format.
-def find_author(s):
-    patterns = ['([\w]+):',  # First Name
-                '([\w]+[\s]+[\w]+):',  # First Name + Last Name
-                # First Name + Middle Name + Last Name
-                '([\w]+[\s]+[\w]+[\s]+[\w]+):',
-                '([+]\d{2} \d{5} \d{5}):',  # Mobile Number (India)
-                '([+]\d{2} \d{3} \d{3} \d{4}):',  # Mobile Number (US)
-                '([\w]+)[\u263a-\U0001f999]+:', ]  # Name and Emoji
+# def find_author(s):
+#     patterns = ['([\w]+):',  # First Name
+#                 '([\w]+[\s]+[\w]+):',  # First Name + Last Name
+#                 # First Name + Middle Name + Last Name
+#                 '([\w]+[\s]+[\w]+[\s]+[\w]+):',
+#                 '([+]\d{2} \d{5} \d{5}):',  # Mobile Number (India)
+#                 '([+]\d{2} \d{3} \d{3} \d{4}):',  # Mobile Number (US)
+#                 '([\w]+)[\u263a-\U0001f999]+:', ]  # Name and Emoji
 
-    pattern = '^' + '|'.join(patterns)
-    result = re.match(pattern, s)
-    if result:
-        return True
-    return False
+    # pattern = '^' + '|'.join(patterns)
+    # result = re.match(pattern, s)
+    # if result:
+    #     return True
+    # return False
 
 
 def get_data_point(current_line):
@@ -110,6 +110,18 @@ def chat_analysis_main(filename):
         lambda s: len(s))
     messages_df['Word_Count'] = messages_df['Message'].apply(
         lambda s: len(s.split(' ')))
+    # This is the filter for deleted messages of author
+
+    def deleted_filter(s):
+        r = re.split('This message was deleted|You deleted this message', s)
+        if sum([len(s) for s in r]) == 0:
+            return 1
+        else:
+            return 0
+
+    # deleted messages count
+    messages_df['Deleted'] = messages_df['Message'].apply(deleted_filter)
+
     # get group members
     authors = messages_df.Author.unique()
     authors = authors[authors != None]  # remove None author
@@ -135,9 +147,11 @@ def chat_analysis_main(filename):
     # individual media messages count of the each member in list
     media_msg = [media_messages_df[media_messages_df['Author']
                                    == authors[i]].shape[0] for i in author_range]
+    # individual deleted messages count of the each member in list
+    deleted_msg = [sum(author_msgs[i]['Deleted']) for i in author_range]
     # creating dictionary with authors key and derived values from above
-    member_stats = {author: [msg, emoji, urls, media, words, time] for author, msg, emoji, urls, media, words, time in
-                    zip(authors, num_msgs, num_emojis, num_urls, media_msg, avg_words_msg, total_time_spent_min)}
+    member_stats = {author: [msg, emoji, urls, media, del_msg, words, time] for author, msg, emoji, urls, media, del_msg, words, time in
+                    zip(authors, num_msgs, num_emojis, num_urls, media_msg, deleted_msg, avg_words_msg, total_time_spent_min)}
     # member_stats['authors'] = authors
     return data_frame, messages_df, member_stats
 

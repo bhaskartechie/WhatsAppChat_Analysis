@@ -31,7 +31,7 @@
   </tr>
   {% for key, value in msg_statistics.items %}
   <tr>
-    <td>{{key}}</td>
+    <td style="min-width:150px; background-color:#e8d548;">{{key}}</td>
     <td>{{value}}</td>
   </tr>
   {% endfor %}
@@ -70,13 +70,14 @@
     <th>Text messages</th>
     <th>Emojies</th>
     <th>Links shared</th>
-    <th>Media Files</th>
+    <th>Media files</th>
+    <th>Deleted messages</th>
     <th>Average words per message</th>
     <th>Total Time spent(min)</th>
   </tr>
   {% for key, value in member_stats.items %}
   <tr>
-    <td style="min-width:250px; background-color:#e8d548;">{{key}}</td>
+    <td style="min-width:180px; background-color:#e8d548;">{{key}}</td>
     {% for v in value %}
     <td>{{v}}</td>
     {% endfor %}
