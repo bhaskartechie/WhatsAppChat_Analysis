@@ -1,4 +1,5 @@
 {%extends "base.html" %} {% block content %}
+
 <h2 style="text-align: center"><strong>{{present_group_name}}</strong></h2>
 <p>
   Group created by <strong>"{{creator}}"</strong> with group name
@@ -77,11 +78,55 @@
   </tr>
   {% for key, value in member_stats.items %}
   <tr>
-    <td style="min-width:180px; background-color:#e8d548;">{{key}}</td>
+    <td style="min-width:180px; background-color:#e8d548;"><a href="">{{key}}</a></td>
     {% for v in value %}
     <td>{{v}}</td>
     {% endfor %}
   </tr>
   {% endfor %}
 </table>
+<h3>Graphs of the members statistics</h3>
+{% comment %} {% include 'groupchat/graphs.html' %}  {% endcomment %}
+{% comment %} <a href = "{% url 'GroupChat:draw_graph' %}"">Bhaskar</a>  {% endcomment %}
+    {% comment %} {% for k, v in value.items %} {% endcomment %}
+    {% comment %} {% for key, value in author_weekdays.items %}
+    {% endfor %} {% endcomment %}
+    {% comment %} <div id="container" style="width: 75%">
+        <canvas id="sample-chart"> Hi> </canvas>
+    </div>
+<script>
+  $(function () {
+    var $populationChart = $("#sample-chart");
+    $.ajax({
+      url: $populationChart.data("url"),
+      success: function (data) {
+        var ctx = $populationChart[0].getContext("2d");
+
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: {{data.0|safe}},
+            datasets: [
+              {
+                label: "Weekdays sent",
+                backgroundColor: "blue",
+                data: {{data.1|safe}},
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            legend: {
+              position: "top",
+            },
+            title: {
+              display: true,
+              text: "Week day sent messages",
+            },
+          },
+        });
+      },
+    });
+  });
+</script> {% endcomment %}
 {% endblock %}

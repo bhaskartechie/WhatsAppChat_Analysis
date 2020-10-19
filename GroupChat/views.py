@@ -1,10 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .WhatsApp_chat_analysis import chat_analysis_main
+from .WhatsApp_chat_analysis import chat_analysis_main, dayofweek
 import re
 import numpy as np
 from django.conf import settings
 import os
+from collections import OrderedDict
+from django.http import JsonResponse
+# from django.views.generic import TemplateView
+# from chartjs.views.lines import BaselLineChartView
 
 
 def create_local_chat_file(fd):
@@ -167,7 +171,39 @@ def find_active_members(df, authors):
     return group_members
 
 
+def find_day_of_chat(request, df, senders):
+    """[summary]
+
+    Args:
+        df ([pandas dataframe]): [This dataframe contains all message statistics of the authors]
+        senders ([list]): [authors who send messages in the group]
+
+    Returns:
+        sender_days ([dictionary]): [This dictionaty contains the total messages sent on perticuler day]
+    """
+    sender_days = OrderedDict()
+    for sender in range(len(senders)):
+        # find the weekdays of the week columns and convert to the list
+        weekdays = df[df['Author'] == senders[sender]]['Date'].apply(
+            lambda d: d.weekday()).to_list()
+        # count the number of weekdays
+        values = OrderedDict()
+        for day in range(7):
+            values[dayofweek(day)] = sum([int(d == day) for d in weekdays])
+        sender_days[senders[sender]] = values
+    data = [list(sender_days['Bhaskar'].keys()),
+            list(sender_days['Bhaskar'].values())]
+    request.session['data'] = data
+    # return render(request, 'groupchat/graphs.html', {'data': data})
+    return sender_days
 # Create your views here.
+
+
+def plot_days_plot(request, author=None):
+    data = request.session['data']
+    return render(request, 'groupchat/graphs.html', {'data': data})
+
+
 def home(request):
     if request.method == 'POST' and request.FILES['chat_file']:
         # form = UploadChatFileForm(request.POST, request.FILES)
@@ -176,6 +212,7 @@ def home(request):
         chat_filename = create_local_chat_file(request.FILES['chat_file'])
         data_frame, messages_df, member_stats = chat_analysis_main(
             chat_filename)
+
         first_msg = data_frame['Message'][0]
         first_date = data_frame['Date'][0].date()
         first_time = data_frame['Time'][0]
@@ -204,7 +241,7 @@ def home(request):
             present_group_name = first_group_name
         else:
             present_group_name = group_names[-1][2]
-
+        data = find_day_of_chat(request, messages_df, authors)
         msg_statistics = {'Total messages': total_messages,
                           'Media messages': media_messages,
                           'Total Emojis': emojis,
@@ -222,7 +259,8 @@ def home(request):
                                                                 'dp_changes': dp_changes,
                                                                 'msg_statistics': msg_statistics,
                                                                 'group_names': group_names,
-                                                                'member_stats': member_stats, })
+                                                                'member_stats': member_stats,
+                                                                'data': data, })
 
     # else:
     #     form = UploadChatFileForm()

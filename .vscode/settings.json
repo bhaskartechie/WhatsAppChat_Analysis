@@ -1,6 +1,6 @@
 {
     "python.pythonPath": "C:/Users/Administrator/Work/Whats_App_Chat_Analysis/venv/Scripts/python.exe",
-    "window.zoomLevel": 0.5
+    "window.zoomLevel": 0.5,
     "workbench.colorCustomizations": {
         "terminal.background":"#090300",
         "terminal.foreground":"#A5A2A2",

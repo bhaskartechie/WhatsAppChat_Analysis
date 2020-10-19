@@ -1,0 +1,41 @@
+{% extends 'base.html' %} {% block content %}
+<div id="container" style="width: 75%">
+  <canvas id="sample-chart"> Hi> </canvas>
+</div>
+<script>
+  $(function () {
+    var $populationChart = $("#sample-chart");
+    $.ajax({
+      url: $populationChart.data("url"),
+      success: function (data) {
+        var ctx = $populationChart[0].getContext("2d");
+
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: {{data.0|safe}},
+            datasets: [
+              {
+                label: "Weekdays sent",
+                backgroundColor: "blue",
+                data: {{data.1|safe}},
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            legend: {
+              position: "top",
+            },
+            title: {
+              display: true,
+              text: "Week day sent messages",
+            },
+          },
+        });
+      },
+    });
+  });
+</script>
+
+{% endblock %}
