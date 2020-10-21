@@ -171,7 +171,7 @@ def find_active_members(df, authors):
     return group_members
 
 
-def find_day_of_chat(request, df, senders):
+def find_day_of_chat(df, senders):
     """[summary]
 
     Args:
@@ -191,17 +191,19 @@ def find_day_of_chat(request, df, senders):
         for day in range(7):
             values[dayofweek(day)] = sum([int(d == day) for d in weekdays])
         sender_days[senders[sender]] = values
-    data = [list(sender_days['Bhaskar'].keys()),
-            list(sender_days['Bhaskar'].values())]
-    request.session['data'] = data
+    # data = [list(sender_days['Bhaskar'].keys()),
+    #         list(sender_days['Bhaskar'].values())]
     # return render(request, 'groupchat/graphs.html', {'data': data})
     return sender_days
 # Create your views here.
 
 
-def plot_days_plot(request, author=None):
-    data = request.session['data']
-    return render(request, 'groupchat/graphs.html', {'data': data})
+def authors_days_plot(request, id):
+    sent_days = request.session['authors_days']
+    author = list(sent_days)[id]
+    author_sent = sent_days[author]
+    author_sent = [list(author_sent.keys()), list(author_sent.values())]
+    return render(request, 'groupchat/graphs.html', {'author': author, 'author_sent': author_sent})
 
 
 def home(request):
@@ -241,7 +243,9 @@ def home(request):
             present_group_name = first_group_name
         else:
             present_group_name = group_names[-1][2]
-        data = find_day_of_chat(request, messages_df, authors)
+        authors_days = find_day_of_chat(messages_df, authors)
+        # ! save data to session to send this data graphs of which day most day
+        request.session['authors_days'] = authors_days
         msg_statistics = {'Total messages': total_messages,
                           'Media messages': media_messages,
                           'Total Emojis': emojis,
@@ -259,8 +263,8 @@ def home(request):
                                                                 'dp_changes': dp_changes,
                                                                 'msg_statistics': msg_statistics,
                                                                 'group_names': group_names,
-                                                                'member_stats': member_stats,
-                                                                'data': data, })
+                                                                'member_stats': member_stats, })
+        # 'data': data, })
 
     # else:
     #     form = UploadChatFileForm()
