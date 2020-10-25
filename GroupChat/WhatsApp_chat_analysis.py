@@ -87,18 +87,20 @@ def chat_analysis_main(filename):
             if starts_with_date_and_time(line):
                 if len(message_buffer) > 0:
                     parsed_data.append(
-                        [date, time, author, ' '.join(message_buffer)])
+                        [f'{date} {time}', author, ' '.join(message_buffer)])
                 message_buffer.clear()
                 date, time, author, message = get_data_point(line)
                 message_buffer.append(message)
             else:
                 message_buffer.append(line)
-        parsed_data.append([date, time, author, ' '.join(message_buffer)])
+        parsed_data.append(
+            [f'{date} {time}', author, ' '.join(message_buffer)])
     # Initialising a pandas Dataframe.
     data_frame = pd.DataFrame(parsed_data, columns=[
-                              'Date', 'Time', 'Author', 'Message'])
+                              'Date', 'Author', 'Message'])
     data_frame["Date"] = pd.to_datetime(data_frame["Date"])
-    data_frame['Date'] = data_frame['Date'].dt.strftime('%d/%m/%Y')
+    # by defualt month showing as day and vice versa to emilinate apply this
+    data_frame['Date'] = data_frame['Date'].dt.strftime('%d/%m/%Y %H:%M:%S')
     data_frame["Date"] = pd.to_datetime(data_frame["Date"])
     data_frame["emoji"] = data_frame["Message"].apply(split_count)
     url_pattern = r'(https?://\S+)'

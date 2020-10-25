@@ -1,11 +1,17 @@
 {% extends 'base.html' %} {% block content %}
 <h2>{{author}}</h2>
+<p style="text-align: center; font-size: 15px; color: gray">
+  (Total messages sent on days)
+
+</p>
 <div
   id="container"
   style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto"
 >
   <canvas id="sample-chart">{{author}} </canvas>
+  
 </div>
+{% include 'groupchat/emojies_pie_plot.html' %}
 <body>
   <script>
     new Chart(document.getElementById("sample-chart"), {
@@ -33,7 +39,6 @@
             display: false,
             text: 'This sample',
           },
-
           legend: {
             display: false,
               position: 'top',

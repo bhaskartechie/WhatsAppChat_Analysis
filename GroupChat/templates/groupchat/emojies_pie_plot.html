@@ -1,0 +1,39 @@
+{% block content %}
+<p style="text-align: center; font-size: 15px; color: gray">
+  (Emojies counter)
+
+<p>Hi</p>
+<div
+  id="container"
+  style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto"
+>
+  <canvas id="pie_chart">{{author}} </canvas>
+</div>
+<body>
+  <script>
+    new Chart(document.getElementById("pie_chart"), {
+        type: "pie",
+        data: {
+          labels: {{emojies_sent_mem.0|safe}},
+          datasets: [
+            {
+
+              data: {{emojies_sent_mem.1|safe}}
+            },
+          ],
+        },
+        options: {
+
+          title: {
+            display: false,
+            text: 'This sample',
+          },
+          legend: {
+            display: false,
+              position: 'top',
+           },
+        },
+      });
+  </script>
+</body>
+{% endblock %}

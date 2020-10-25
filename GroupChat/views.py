@@ -7,6 +7,7 @@ from django.conf import settings
 import os
 from collections import OrderedDict
 from django.http import JsonResponse
+from collections import Counter
 # from django.views.generic import TemplateView
 # from chartjs.views.lines import BaselLineChartView
 
@@ -181,7 +182,17 @@ def find_day_of_chat(df, senders):
     Returns:
         sender_days ([dictionary]): [This dictionaty contains the total messages sent on perticuler day]
     """
+    # individual senders dictionary
     sender_days = OrderedDict()
+    # whole dictionary
+    group_sent_days = OrderedDict()
+    # sent days by group
+    sent_by_days = df['Date'].apply(lambda d: d.weekday()).to_list()
+    # calculate number of sent messages day wise
+    for day in range(7):
+        group_sent_days[dayofweek(day)] = sum(
+            [int(d == day) for d in sent_by_days])
+
     for sender in range(len(senders)):
         # find the weekdays of the week columns and convert to the list
         weekdays = df[df['Author'] == senders[sender]]['Date'].apply(
@@ -191,19 +202,59 @@ def find_day_of_chat(df, senders):
         for day in range(7):
             values[dayofweek(day)] = sum([int(d == day) for d in weekdays])
         sender_days[senders[sender]] = values
-    # data = [list(sender_days['Bhaskar'].keys()),
-    #         list(sender_days['Bhaskar'].values())]
-    # return render(request, 'groupchat/graphs.html', {'data': data})
-    return sender_days
-# Create your views here.
+
+    return sender_days, group_sent_days
 
 
-def authors_days_plot(request, id):
+def authors_days_plot(request, key):
+    # author week days plot
     sent_days = request.session['authors_days']
-    author = list(sent_days)[id]
+    author = list(sent_days)[key]
     author_sent = sent_days[author]
     author_sent = [list(author_sent.keys()), list(author_sent.values())]
-    return render(request, 'groupchat/graphs.html', {'author': author, 'author_sent': author_sent})
+    # author sent emojies
+    emojies_sent = request.session['emoji_sent_author']
+    # author = list(emojies_sent)[key]
+    emojies = emojies_sent[author]
+    emojies_sent_mem = [list(emojies.keys()), list(emojies.values())]
+    return render(request, 'groupchat/graphs.html', {'author': author,
+                                                     'author_sent': author_sent,
+                                                     'emojies_sent_mem': emojies_sent_mem, })
+
+
+def group_days_plot(request):
+    sent_days = request.session['group_days']
+    group_name = request.session['present_group_name']
+    group_days = [list(sent_days.keys()), list(sent_days.values())]
+    emojies_sent = request.session['emoji_sent_author']
+    author = list(emojies_sent)
+    emojies = emojies_sent[author]
+    emojies_sent_grp = [list(emojies.keys()), list(emojies.values())]
+    return render(request, 'groupchat/graphs.html', {'emojies_sent_group': emojies_sent_grp,
+                                                    'author': group_name,
+                                                    'author_sent': group_days, })
+
+
+def emoji_stats(messages_df, authors):
+    emojies_sent = OrderedDict()
+    for sender in authors:
+        # get author dataframe
+        author_df = messages_df[messages_df['Author'] == sender]
+        # filter only emojies to list
+        total_emojis_list = list([a for b in author_df.emoji for a in b])
+        # count the each emojies count
+        emoji_dict = dict(Counter(total_emojis_list))
+        # create another dict for the each author
+        emojies_sent[sender] = emoji_dict
+    return emojies_sent
+
+
+# def emoji_sent_author_plot(request, id):
+#     emojies_sent = request.session['emoji_sent_author']
+#     author = list(emojies_sent)[id]
+#     emojies = emojies_sent[author]
+#     emojies_sent = [list(emojies.keys()), list(emojies.values())]
+#     return render(request, 'groupchat/emojies_pie_plot.html', {'emojies_sent': emojies_sent})
 
 
 def home(request):
@@ -217,7 +268,8 @@ def home(request):
 
         first_msg = data_frame['Message'][0]
         first_date = data_frame['Date'][0].date()
-        first_time = data_frame['Time'][0]
+        # get the time from data frame
+        first_time = data_frame['Date'][0].time()
         # creator of the group member
         creator = first_msg.split(' created group')[0]
         # get None author data, it is special author for group operations
@@ -243,9 +295,14 @@ def home(request):
             present_group_name = first_group_name
         else:
             present_group_name = group_names[-1][2]
-        authors_days = find_day_of_chat(messages_df, authors)
+        authors_days, group_days = find_day_of_chat(messages_df, authors)
+        emoji_sent_author = emoji_stats(messages_df, authors)
         # ! save data to session to send this data graphs of which day most day
         request.session['authors_days'] = authors_days
+        request.session['group_days'] = group_days
+        request.session['present_group_name'] = present_group_name
+        request.session['emoji_sent_author'] = emoji_sent_author
+
         msg_statistics = {'Total messages': total_messages,
                           'Media messages': media_messages,
                           'Total Emojis': emojis,

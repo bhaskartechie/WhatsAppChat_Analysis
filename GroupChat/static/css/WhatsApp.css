@@ -90,3 +90,8 @@ ol {
   left: 100px;
   list-style-type: none;
 }
+.author_below_text {
+  color: grey;
+  font-size: 5px;
+  text-align: center;
+}
