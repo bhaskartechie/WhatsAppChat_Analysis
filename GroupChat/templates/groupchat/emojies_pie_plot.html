@@ -17,7 +17,6 @@
           labels: {{emojies_sent_mem.0|safe}},
           datasets: [
             {
-
               data: {{emojies_sent_mem.1|safe}}
             },
           ],
@@ -32,6 +31,11 @@
             display: false,
               position: 'top',
            },
+           plugins: {
+            colorschemes: {
+                scheme: 'brewer.Paired12'
+            }
+        },
         },
       });
   </script>
