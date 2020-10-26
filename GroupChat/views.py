@@ -37,6 +37,9 @@ def group_dp_changes(df, date, created_by):
     else:
         return num_changes, date, created_by
 
+def get_month(month_number):
+    months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    return months[month_number -1] 
 
 # function to count the number of times group name changed
 def group_name_changes(df):
@@ -111,26 +114,26 @@ def find_active_members(df, authors):
     authors_list.extend(joined_by_link)
     authors_list.extend(authors)
 
-    # get the vlues which contains "left" keyword for left members
+    # get the values which contains "left" keyword for left members
     keyword_left = 'left'
     left_mem = df[df['Message'].str.findall(
         keyword_left).astype(bool)]['Message']
     # get first value in the list
     l_m = left_mem.str.rsplit(
         keyword_left).apply(lambda x: x.pop(0)).to_list()
-    left_mem = [s.strip() for s in l_m]  # strimming list elemets
-    # get only unique others out of left mutliple times
+    left_mem = [s.strip() for s in l_m]  # trimming list elements
+    # get only unique others out of left multiple times
     left_mem = list(set(left_mem))
 
-    # get the vlues which contains "removed" keyword for removed members
+    # get the values which contains "removed" keyword for removed members
     keyword_removed = 'removed'
     rem_members = df[df['Message'].str.findall(
         keyword_removed).astype(bool)]['Message']
     # get first value in the list
     r_m = rem_members.str.rsplit(
         keyword_removed).apply(lambda x: x.pop(1)).to_list()
-    rem_members = [s.strip() for s in r_m]  # strimming list elemets
-    # get only unique others out of removed mutliple times
+    rem_members = [s.strip() for s in r_m]  # trimming list elements
+    # get only unique others out of removed multiple times
     rem_members = list(set(rem_members))
 
     left_members = []
@@ -207,19 +210,22 @@ def find_day_of_chat(df, senders):
 
 
 def authors_days_plot(request, key):
-    # author week days plot
+    # member week days plot
     sent_days = request.session['authors_days']
     author = list(sent_days)[key]
     author_sent = sent_days[author]
     author_sent = [list(author_sent.keys()), list(author_sent.values())]
-    # author sent emojies
+    # member sent emojies
     emojies_sent = request.session['emoji_sent_author']
-    # author = list(emojies_sent)[key]
     emojies = emojies_sent[author]
     emojies_sent_mem = [list(emojies.keys()), list(emojies.values())]
+    # member sent data each month
+    each_month_data = request.session['each_month_data']
+    each_month_data = each_month_data[author]
     return render(request, 'groupchat/graphs.html', {'author': author,
                                                      'author_sent': author_sent,
-                                                     'emojies_sent_mem': emojies_sent_mem, })
+                                                     'emojies_sent_mem': emojies_sent_mem,
+                                                     'each_month_data': each_month_data, })
 
 
 def group_days_plot(request):
@@ -248,14 +254,27 @@ def emoji_stats(messages_df, authors):
         emojies_sent[sender] = emoji_dict
     return emojies_sent
 
+def sent_messages_over_time(df, members):
+    # initialize ordereddict for maintaining order of values
+    month_wise_data = OrderedDict()
+    for sender in members:
+        # get each sender dataframe from actual dataframe
+        sender_df = df[df['Author'] == sender]
+        # group the data by month and year with number of sent messages for each month and convert to dictionary 
+        months_data = sender_df.groupby([sender_df['Date'].dt.year, sender_df['Date'].dt.month]).agg({'Author':len}).to_dict()
+        # get dictionary data
+        data = months_data['Author']
+        # months list
+        months_list = list(data.keys())
+        # swap month to year by converting month number to string
+        months_list = [(get_month(t[1]), t[0]) for t in months_list]
+        # sent messages
+        values_list = list(data.values())
+        # insert all data 
+        month_wise_data[sender] = [months_list, values_list]
 
-# def emoji_sent_author_plot(request, id):
-#     emojies_sent = request.session['emoji_sent_author']
-#     author = list(emojies_sent)[id]
-#     emojies = emojies_sent[author]
-#     emojies_sent = [list(emojies.keys()), list(emojies.values())]
-#     return render(request, 'groupchat/emojies_pie_plot.html', {'emojies_sent': emojies_sent})
-
+    return month_wise_data
+   
 
 def home(request):
     if request.method == 'POST' and request.FILES['chat_file']:
@@ -282,12 +301,14 @@ def home(request):
         deleted_messages = np.sum(messages_df.Deleted)
         media_messages = data_frame[data_frame['Message']
                                     == '<Media omitted>'].shape[0]
+        messages_df.sort_values(by='Date')
+        # * From here functions manipulation functions are starting
         # function to find the number changes in the group names
         group_names = group_name_changes(none_data)
         # function to find the number changes in the group dps
         num_dp_changes, dp_last_change, dp_last_change_by = group_dp_changes(
             none_data, first_date, creator)
-        #
+        
         group_members = find_active_members(none_data, authors)
         # all_authors = find_all_authors(data_frame)
         first_group_name = group_names[0][1]
@@ -297,11 +318,14 @@ def home(request):
             present_group_name = group_names[-1][2]
         authors_days, group_days = find_day_of_chat(messages_df, authors)
         emoji_sent_author = emoji_stats(messages_df, authors)
+        each_month_data = sent_messages_over_time(messages_df, authors)
+
         # ! save data to session to send this data graphs of which day most day
         request.session['authors_days'] = authors_days
         request.session['group_days'] = group_days
         request.session['present_group_name'] = present_group_name
         request.session['emoji_sent_author'] = emoji_sent_author
+        request.session['each_month_data'] = each_month_data
 
         msg_statistics = {'Total messages': total_messages,
                           'Media messages': media_messages,
