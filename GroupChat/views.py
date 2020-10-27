@@ -8,6 +8,10 @@ import os
 from collections import OrderedDict
 from django.http import JsonResponse
 from collections import Counter
+import datetime
+from wordcloud import WordCloud, STOPWORDS
+import matplotlib.pyplot as plt
+
 # from django.views.generic import TemplateView
 # from chartjs.views.lines import BaselLineChartView
 
@@ -140,7 +144,7 @@ def find_active_members(df, authors):
     removed_members = []
     active_members = []
     for author in left_mem + rem_members:
-        # + is a special character and you have to escape it with \:
+        # + is a special character and you have to escape it with \
         if author[0] == '+':
             activity = df['Message'].str.split(f'\{author}')
         else:
@@ -183,7 +187,7 @@ def find_day_of_chat(df, senders):
         senders ([list]): [authors who send messages in the group]
 
     Returns:
-        sender_days ([dictionary]): [This dictionaty contains the total messages sent on perticuler day]
+        sender_days ([dictionary]): [This dictionary contains the total messages sent on perticular day of the week]
     """
     # individual senders dictionary
     sender_days = OrderedDict()
@@ -209,7 +213,7 @@ def find_day_of_chat(df, senders):
     return sender_days, group_sent_days
 
 
-def authors_days_plot(request, key):
+def plot_group_stats(request, key):
     # member week days plot
     sent_days = request.session['authors_days']
     author = list(sent_days)[key]
@@ -222,10 +226,15 @@ def authors_days_plot(request, key):
     # member sent data each month
     each_month_data = request.session['each_month_data']
     each_month_data = each_month_data[author]
+    # bar plot of the active time for each member 
+    time_wise_messages = request.session['time_wise_messages']
+    member_times = time_wise_messages[author]
+    member_timings = [list(member_times.keys()), list(member_times.values())]
     return render(request, 'groupchat/graphs.html', {'author': author,
                                                      'author_sent': author_sent,
                                                      'emojies_sent_mem': emojies_sent_mem,
-                                                     'each_month_data': each_month_data, })
+                                                     'each_month_data': each_month_data,
+                                                     'member_timings': member_timings, })
 
 
 def group_days_plot(request):
@@ -275,6 +284,25 @@ def sent_messages_over_time(df, members):
 
     return month_wise_data
    
+def member_chatting_time(df, members):
+
+    time_wise_data = OrderedDict()
+    for sender in members:
+        # get each sender dataframe from actual dataframe
+        sender_df = df[df['Author'] == sender]
+        # get the number od sent messages between two timings
+        early_morning = len(sender_df[sender_df.Date.dt.strftime('%H:%M:%S').between('04:00:00','08:00:00')])
+        morning = len(sender_df[sender_df.Date.dt.strftime('%H:%M:%S').between('08:00:00','13:00:00')])
+        afternoon = len(sender_df[sender_df.Date.dt.strftime('%H:%M:%S').between('13:00:00','17:00:00')])
+        evening = len(sender_df[sender_df.Date.dt.strftime('%H:%M:%S').between('17:00:00','22:00:00')])
+        night = len(sender_df[sender_df.Date.dt.strftime('%H:%M:%S').between('22:00:00','23:59:00')]) + \
+                len(sender_df[sender_df.Date.dt.strftime('%H:%M:%S').between('00:00:00','04:00:00')])
+        time_wise_data[sender] = {'Early Morning(4am-8am)':early_morning,
+                                  'Morning(8am-1pm)': morning,
+                                  'Afternoon(1pm-5pm)':afternoon,
+                                  'Evening(5pm-10pm)': evening,
+                                  'Night(10pm-4am)': night, }
+    return time_wise_data
 
 def home(request):
     if request.method == 'POST' and request.FILES['chat_file']:
@@ -302,6 +330,8 @@ def home(request):
         media_messages = data_frame[data_frame['Message']
                                     == '<Media omitted>'].shape[0]
         messages_df.sort_values(by='Date')
+        data_frame.sort_values(by='Date')
+
         # * From here functions manipulation functions are starting
         # function to find the number changes in the group names
         group_names = group_name_changes(none_data)
@@ -310,22 +340,27 @@ def home(request):
             none_data, first_date, creator)
         
         group_members = find_active_members(none_data, authors)
-        # all_authors = find_all_authors(data_frame)
         first_group_name = group_names[0][1]
         if len(group_names[0]) == 2:
             present_group_name = first_group_name
         else:
             present_group_name = group_names[-1][2]
-        authors_days, group_days = find_day_of_chat(messages_df, authors)
-        emoji_sent_author = emoji_stats(messages_df, authors)
-        each_month_data = sent_messages_over_time(messages_df, authors)
-
+        # sent messages on which day of the week for each each member and whole group
+        authors_days, group_days = find_day_of_chat(data_frame, authors)
+        # numbers of emojies in each member sent messages
+        emoji_sent_author = emoji_stats(data_frame, authors)
+        # count of the sent messages of each month from joining 
+        each_month_data = sent_messages_over_time(data_frame, authors)
+        # find active timing of the member
+        time_wise_messages = member_chatting_time(data_frame, authors)
+        
         # ! save data to session to send this data graphs of which day most day
         request.session['authors_days'] = authors_days
         request.session['group_days'] = group_days
         request.session['present_group_name'] = present_group_name
         request.session['emoji_sent_author'] = emoji_sent_author
         request.session['each_month_data'] = each_month_data
+        request.session['time_wise_messages'] = time_wise_messages
 
         msg_statistics = {'Total messages': total_messages,
                           'Media messages': media_messages,

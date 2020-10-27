@@ -95,11 +95,11 @@ def chat_analysis_main(filename):
                 message_buffer.append(line)
         parsed_data.append(
             [f'{date} {time}', author, ' '.join(message_buffer)])
-    # Initialising a pandas Dataframe.
+    # Initializing a pandas Dataframe.
     data_frame = pd.DataFrame(parsed_data, columns=[
                               'Date', 'Author', 'Message'])
     data_frame["Date"] = pd.to_datetime(data_frame["Date"])
-    # by defualt month showing as day and vice versa to emilinate apply this
+    # by default month showing as day and vice versa to emilinate apply this
     data_frame['Date'] = data_frame['Date'].dt.strftime('%d/%m/%Y %H:%M:%S')
     data_frame["Date"] = pd.to_datetime(data_frame["Date"])
     data_frame["emoji"] = data_frame["Message"].apply(split_count)
@@ -113,7 +113,7 @@ def chat_analysis_main(filename):
     messages_df['Word_Count'] = messages_df['Message'].apply(
         lambda s: len(s.split(' ')))
     # This is the filter for deleted messages of author
-
+    
     def deleted_filter(s):
         r = re.split('This message was deleted|You deleted this message', s)
         if sum([len(s) for s in r]) == 0:

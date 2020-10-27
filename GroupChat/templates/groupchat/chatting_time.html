@@ -1,37 +1,29 @@
-{% extends 'base.html' %} {% block content %}
-<h2>{{author}}</h2>
+{% block content %}
 <p style="text-align: center; font-size: 15px; color: gray">
-  (Total messages sent on days)
+  (Chatting time)
 
-</p>
+<p>Hi</p>
 <div
   id="container"
   style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto"
 >
-  <canvas id="sample-chart">{{author}} </canvas>
-  
+  <canvas id="chatting_time">{{author}} </canvas>
 </div>
-{% include 'groupchat/emojies_pie_plot.html' %}
-{% include 'groupchat/sent_messages_from_joining.html' %}
-{% include 'groupchat/chatting_time.html' %}
 <body>
   <script>
-    new Chart(document.getElementById("sample-chart"), {
+    new Chart(document.getElementById("chatting_time"), {
         type: "bar",
         data: {
-          labels: {{author_sent.0|safe}},
+          labels: {{member_timings.0|safe}},
           datasets: [
             {
-              backgroundColor: [
+            backgroundColor: [
                 "#3e95cd",
-                "#8e5ea2",
+                "green",
                 "#3cba9f",
                 "#e8c3b9",
-                "#c45850",
-                "green",
-                "red",
-              ],
-              data: {{author_sent.1|safe}}
+                "red"],
+              data: {{member_timings.1|safe}}
             },
           ],
         },
@@ -45,6 +37,11 @@
             display: false,
               position: 'top',
            },
+           plugins: {
+            colorschemes: {
+                scheme: 'brewer.Paired12'
+            }
+        },
         },
       });
   </script>
