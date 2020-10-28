@@ -104,35 +104,44 @@ def chat_analysis_main(filename):
     data_frame["Date"] = pd.to_datetime(data_frame["Date"])
     data_frame["emoji"] = data_frame["Message"].apply(split_count)
     url_pattern = r'(https?://\S+)'
-    data_frame['urlcount'] = data_frame.Message.apply(
+    data_frame['isURL'] = data_frame.Message.apply(
         lambda x: re.findall(url_pattern, x)).str.len()
+    data_frame['isMedia'] = (data_frame['Message'] == '<Media omitted>').apply(int)
     media_messages_df = data_frame[data_frame['Message'] == '<Media omitted>']
     messages_df = data_frame.drop(media_messages_df.index)
-    messages_df['Letter_Count'] = messages_df['Message'].apply(
-        lambda s: len(s))
-    messages_df['Word_Count'] = messages_df['Message'].apply(
-        lambda s: len(s.split(' ')))
-    # This is the filter for deleted messages of author
     
+    # This is the filter for deleted messages of author
     def deleted_filter(s):
         r = re.split('This message was deleted|You deleted this message', s)
         if sum([len(s) for s in r]) == 0:
             return 1
         else:
             return 0
-
     # deleted messages count
-    messages_df['Deleted'] = messages_df['Message'].apply(deleted_filter)
+    data_frame['isDeleted'] = data_frame['Message'].apply(deleted_filter)
+    # 
+    data_frame['Letter_Count'] = data_frame['Message'].apply(
+        lambda s: len(s))
+    data_frame['Word_Count'] = data_frame['Message'].apply(
+        lambda s: len(s.split(' ')))
+    # Ignoring 1) deleted 2)media 3) message word count more less tha 10 words 4) url 5) none author 
+    filter_typed =  data_frame[(data_frame['isDeleted'] == 0) & (data_frame['isMedia'] == 0) & \
+                    (data_frame['Word_Count'] < 10) & (data_frame['isURL'] == 0) & (data_frame['Author'].notnull())]
+    filter_forwarded =  data_frame[(data_frame['isDeleted'] == 0) & (data_frame['isMedia'] == 0) & \
+                    (data_frame['Word_Count'] > 10) & (data_frame['isURL'] == 0) & (data_frame['Author'].notnull())] 
+    
+    data_frame['Typed'] = filter_typed['Message']
+    data_frame['Forwarded'] = filter_forwarded['Message']
 
     # get group members
-    authors = messages_df.Author.unique()
+    authors = data_frame.Author.unique()
     authors = authors[authors != None]  # remove None author
 
     author_range = range(len(authors))
     # Average typing speed in mobile, actual reference is 38
     avg_typing_speed = 25
     # individual each member data
-    author_msgs = [messages_df[messages_df["Author"] == authors[writer]]
+    author_msgs = [data_frame[data_frame["Author"] == authors[writer]]
                    for writer in author_range]
     # individual messages count of the each member in list
     num_msgs = [author_msgs[i].shape[0] for i in author_range]
@@ -145,100 +154,15 @@ def chat_analysis_main(filename):
     # individual emojies count of the each member in list
     num_emojis = [sum(author_msgs[i]['emoji'].str.len()) for i in author_range]
     # individual urls sent of the each member in list
-    num_urls = [sum(author_msgs[i]['urlcount']) for i in author_range]
+    num_urls = [sum(author_msgs[i]['isURL']) for i in author_range]
     # individual media messages count of the each member in list
     media_msg = [media_messages_df[media_messages_df['Author']
                                    == authors[i]].shape[0] for i in author_range]
     # individual deleted messages count of the each member in list
-    deleted_msg = [sum(author_msgs[i]['Deleted']) for i in author_range]
+    deleted_msg = [sum(author_msgs[i]['isDeleted']) for i in author_range]
     # creating dictionary with authors key and derived values from above
     member_stats = {author: [msg, emoji, urls, media, del_msg, words, time] for author, msg, emoji, urls, media, del_msg, words, time in
                     zip(authors, num_msgs, num_emojis, num_urls, media_msg, deleted_msg, avg_words_msg, total_time_spent_min)}
     # member_stats['authors'] = authors
-    return data_frame, messages_df, member_stats
+    return data_frame, member_stats
 
-#     for writer in range(len(authors)):
-#         # Filtering out messages of particular user
-#         req_df = messages_df[messages_df["Author"] == authors[writer]]
-#         # req_df will contain messages of only one particular user
-#         print(f'Stats of {authors[writer]} -')
-#         # shape will print number of rows which indirectly means the number of messages
-#         print('Messages Sent', req_df.shape[0])
-#         # Word_Count contains of total words in one message. Sum of all words/ Total Messages will yield words per message
-#         words_per_message = (np.sum(req_df['Word_Count'])) / req_df.shape[0]
-#         print('Words per message', words_per_message)
-#         # media consist of media messages
-#         media = media_messages_df[media_messages_df['Author'] == authors[writer]].shape[0]
-#         print('Media Messages Sent', media)
-#         # emojis consist of total emojis
-#         emojis = sum(req_df['emoji'].str.len())
-#         print('Emojis Sent', emojis)
-#         # links consist of total links
-#         links = sum(req_df["urlcount"])
-#         print('Links Sent', links)
-#         print()
-# #
-# total_emojis_list = list(set([a for b in messages_df.emoji for a in b]))
-# total_emojis = len(total_emojis_list)
-# print(total_emojis)
-# total_emojis_list = list([a for b in messages_df.emoji for a in b])
-# emoji_dict = dict(Counter(total_emojis_list))
-# emoji_dict = sorted(emoji_dict.items(), key=lambda x: x[1], reverse=True)
-#
-# emoji_df = pd.DataFrame(emoji_dict, columns=['emoji', 'count'])
-# emoji_df
-#
-#
-# fig = px.pie(emoji_df, values='count', names='emoji', title='Emoji Distribution')
-# fig.update_traces(textposition='inside', textinfo='percent+label')
-# fig.show()
-# l = messages_df.Author.unique()
-# for i in range(len(l)):
-#   dummy_df = messages_df[messages_df['Author'] == l[i]]
-#   total_emojis_list = list([a for b in dummy_df.emoji for a in b])
-#   emoji_dict = dict(Counter(total_emojis_list))
-#   emoji_dict = sorted(emoji_dict.items(), key=lambda x: x[1], reverse=True)
-#   print('Emoji Distribution for', l[i])
-#   author_emoji_df = pd.DataFrame(emoji_dict, columns=['emoji', 'count'])
-#   fig = px.pie(author_emoji_df, values='count', names='emoji')
-#   fig.update_traces(textposition='inside', textinfo='percent+label')
-#   fig.show()
-#
-# text = " ".join(review for review in messages_df.Message)
-# print('Group stats'.center(30, '-'))
-# print(f'Messages          : {total_messages}')
-# print(f'Media             : {media_messages}')
-# print(f'Emojies           : {emojis}')
-# print(f'Links             : {links}')
-# print('-'*30)
-# print("There are {} words in all the messages.".format(len(text)))
-# # stopwords = set(STOPWORDS)
-# # stopwords.update(["ra", "ga", "na", "ani", "em", "ki", "ah", "ha", "la", "eh", "ne", "le"])
-# # Generate a word cloud image
-#
-# # wordcloud = WordCloud(background_color="white").generate(text)
-# # # Display the generated image:
-# # # the matplotlib way:
-# #
-# # plt.figure(figsize=(10, 5))
-# # plt.imshow(wordcloud, interpolation='bilinear')
-# # plt.axis("off")
-# # plt.show()
-#
-# date_df = messages_df.groupby("Date").sum()
-# date_df.reset_index(inplace=True)
-# plt.plot(date_df)
-# fig = px.line(date_df, x="Date", y="MessageCount", title='Number of Messages as time moves on.')
-# fig.update_xaxes(nticks=20)
-# fig.show()
-# # plt.show()
-#
-# messages_df['Date'].value_counts().head(10).plot.barh()
-# plt.xlabel('Number of Messages')
-# plt.ylabel('Date')
-# plt.show()
-#
-# messages_df['Time'].value_counts().head(10).plot.barh()
-# plt.xlabel('Number of messages')
-# plt.ylabel('Time')
-# plt.show()

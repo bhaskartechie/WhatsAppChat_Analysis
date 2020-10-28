@@ -8,10 +8,10 @@
   style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto">
   <canvas id="sample-chart">{{author}} </canvas>
 </div>
-{% include 'groupchat/sent_messages_from_joining.html' %}
-{% include 'groupchat/chatting_time.html' %}
-{% include 'groupchat/display_word_cloud.html' %}
-{% include 'groupchat/emojies_pie_plot.html' %}
+{% include 'groupchat/members/sent_messages_from_joining.html' %}
+{% include 'groupchat/members/chatting_time.html' %}
+{% include 'groupchat/members/display_word_cloud.html' %}
+{% include 'groupchat/members/emojies_pie_plot.html' %}
 <body>
   <script>
     new Chart(document.getElementById("sample-chart"), {

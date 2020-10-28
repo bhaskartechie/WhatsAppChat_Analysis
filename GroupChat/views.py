@@ -214,7 +214,7 @@ def find_day_of_chat(df, senders):
     return sender_days, group_sent_days
 
 
-def plot_group_stats(request, key):
+def plot_members_stats(request, key):
     # member week days plot
     sent_days = request.session['authors_days']
     author = list(sent_days)[key]
@@ -232,15 +232,16 @@ def plot_group_stats(request, key):
     member_times = time_wise_messages[author]
     member_timings = [list(member_times.keys()), list(member_times.values())]
     image_path = f'word_cloud_images/{key}.jpg'
-    return render(request, 'groupchat/graphs.html', {'author': author,
-                                                     'author_sent': author_sent,
-                                                     'emojies_sent_mem': emojies_sent_mem,
-                                                     'each_month_data': each_month_data,
-                                                     'member_timings': member_timings,
-                                                     'image_path': image_path })
+    return render(request, 'groupchat/members/base_members.html', 
+                            {'author': author,
+                            'author_sent': author_sent,
+                            'emojies_sent_mem': emojies_sent_mem,
+                            'each_month_data': each_month_data,
+                            'member_timings': member_timings,
+                            'image_path': image_path, })
 
 
-def group_days_plot(request):
+def plot_group_stats(request):
     sent_days = request.session['group_days']
     group_name = request.session['present_group_name']
     group_days = [list(sent_days.keys()), list(sent_days.values())]
@@ -248,16 +249,17 @@ def group_days_plot(request):
     author = list(emojies_sent)
     emojies = emojies_sent[author]
     emojies_sent_grp = [list(emojies.keys()), list(emojies.values())]
-    return render(request, 'groupchat/graphs.html', {'emojies_sent_group': emojies_sent_grp,
-                                                    'author': group_name,
-                                                    'author_sent': group_days, })
+    return render(request, 'groupchat/group/base_groups.html', 
+                            {'emojies_sent_group': emojies_sent_grp,
+                            'author': group_name,
+                            'author_sent': group_days, })
 
 
-def emoji_stats(messages_df, authors):
+def emoji_stats(data_frame, authors):
     emojies_sent = OrderedDict()
     for sender in authors:
         # get author dataframe
-        author_df = messages_df[messages_df['Author'] == sender]
+        author_df = data_frame[data_frame['Author'] == sender]
         # filter only emojies to list
         total_emojis_list = list([a for b in author_df.emoji for a in b])
         # count the each emojies count
@@ -308,7 +310,7 @@ def member_chatting_time(df, members):
     return time_wise_data
 
 
-def display_wordcloud(messages_df, authors):
+def display_wordcloud(data_frame, authors):
     # delete previous generated images
     media_path = os.path.join(settings.MEDIA_ROOT, 'word_cloud_images')
     for filename in os.listdir(media_path):
@@ -321,13 +323,14 @@ def display_wordcloud(messages_df, authors):
 
     for i, sender in enumerate(authors):
         # get sender message dataframe
-        sender_df = messages_df[messages_df['Author'] == sender]
+        sender_df = data_frame[data_frame['Author'] == sender]
         # filter the sent messages as
         # 1) ignore shared urls
         # 2) ignore deleted messages
         # 3) If the word count of the sent message is less than 10 words its considered as
         #  typed message not a copied/forwarded message
-        filtered_df = sender_df[(sender_df['urlcount'] == 0) & (sender_df['Deleted'] == 0) & (sender_df['Word_Count'] < 10)]
+        filtered_df = sender_df[(sender_df['isURL'] == 0) & (sender_df['isDeleted'] == 0) & 
+                                (sender_df['Word_Count'] < 10) & (sender_df['isMedia'] == 0)]
         # join all text together as data
         data = ' '.join(filtered_df['Message'].to_list())
         
@@ -358,7 +361,7 @@ def home(request):
         # if form.is_valid():
         # filename = r"C:\Users\Administrator\Work\Whats_App_Chat_Analysis\WhatAppChat.txt"
         chat_filename = create_local_chat_file(request.FILES['chat_file'])
-        data_frame, messages_df, member_stats = chat_analysis_main(
+        data_frame, member_stats = chat_analysis_main(
             chat_filename)
 
         first_msg = data_frame['Message'][0]
@@ -368,16 +371,16 @@ def home(request):
         # creator of the group member
         creator = first_msg.split(' created group')[0]
         # get None author data, it is special author for group operations
-        none_data = messages_df[messages_df["Author"].isnull()]
-        authors = messages_df.Author.unique()
+        none_data = data_frame[data_frame["Author"].isnull()]
+        authors = data_frame.Author.unique()
         authors = authors[authors != None]
         total_messages = data_frame.shape[0]
         emojis = sum(data_frame['emoji'].str.len())
-        links = np.sum(data_frame.urlcount)
-        deleted_messages = np.sum(messages_df.Deleted)
+        links = np.sum(data_frame.isURL)
+        deleted_messages = np.sum(data_frame.isDeleted)
         media_messages = data_frame[data_frame['Message']
                                     == '<Media omitted>'].shape[0]
-        messages_df.sort_values(by='Date')
+        
         data_frame.sort_values(by='Date')
 
         # * From here functions manipulation functions are starting
@@ -402,7 +405,7 @@ def home(request):
         # find active timing of the member
         time_wise_messages = member_chatting_time(data_frame, authors)
         # word cloud plot
-        display_wordcloud(messages_df, authors)
+        display_wordcloud(data_frame, authors)
         # ! save data to session to send this data graphs of which day most day
         request.session['authors_days'] = authors_days
         request.session['group_days'] = group_days
