@@ -95,3 +95,9 @@ ol {
   font-size: 5px;
   text-align: center;
 }
+.p_stats_draw {
+  position: absolute;
+  text-align: center;
+  font-size: 15px; 
+  color: gray;
+}

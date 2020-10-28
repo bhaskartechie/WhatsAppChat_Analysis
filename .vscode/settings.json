@@ -1,6 +1,10 @@
 {
     "python.pythonPath": "C:/Users/Administrator/Work/Whats_App_Chat_Analysis/venv/Scripts/python.exe",
     "window.zoomLevel": 0.5,
+    "python.terminal.launchArgs": [
+        "-c",
+        "\"import subprocess; subprocess.call(['ipython', '--no-autoindent'])\""
+    ],
     "workbench.colorCustomizations": {
         "terminal.background": "#090300",
         "terminal.foreground": "#A5A2A2",

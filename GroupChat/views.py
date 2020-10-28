@@ -9,8 +9,9 @@ from collections import OrderedDict
 from django.http import JsonResponse
 from collections import Counter
 import datetime
-from wordcloud import WordCloud, STOPWORDS
-import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+# import matplotlib.pyplot as plt
+from shutil import copyfile, rmtree
 
 # from django.views.generic import TemplateView
 # from chartjs.views.lines import BaselLineChartView
@@ -230,11 +231,13 @@ def plot_group_stats(request, key):
     time_wise_messages = request.session['time_wise_messages']
     member_times = time_wise_messages[author]
     member_timings = [list(member_times.keys()), list(member_times.values())]
+    image_path = f'word_cloud_images/{key}.jpg'
     return render(request, 'groupchat/graphs.html', {'author': author,
                                                      'author_sent': author_sent,
                                                      'emojies_sent_mem': emojies_sent_mem,
                                                      'each_month_data': each_month_data,
-                                                     'member_timings': member_timings, })
+                                                     'member_timings': member_timings,
+                                                     'image_path': image_path })
 
 
 def group_days_plot(request):
@@ -304,6 +307,51 @@ def member_chatting_time(df, members):
                                   'Night(10pm-4am)': night, }
     return time_wise_data
 
+
+def display_wordcloud(messages_df, authors):
+    # delete previous generated images
+    media_path = os.path.join(settings.MEDIA_ROOT, 'word_cloud_images')
+    for filename in os.listdir(media_path):
+        if filename.endswith('.jpg'):
+            filepath = os.path.join(media_path, filename)
+            try:
+                rmtree(filepath)
+            except OSError:
+                os.remove(filepath)
+
+    for i, sender in enumerate(authors):
+        # get sender message dataframe
+        sender_df = messages_df[messages_df['Author'] == sender]
+        # filter the sent messages as
+        # 1) ignore shared urls
+        # 2) ignore deleted messages
+        # 3) If the word count of the sent message is less than 10 words its considered as
+        #  typed message not a copied/forwarded message
+        filtered_df = sender_df[(sender_df['urlcount'] == 0) & (sender_df['Deleted'] == 0) & (sender_df['Word_Count'] < 10)]
+        # join all text together as data
+        data = ' '.join(filtered_df['Message'].to_list())
+        
+        # ! pending with emoji inclusion
+        emoji_path = os.path.join(settings.MEDIA_ROOT, 'NotoColorEmoji.ttf')
+        try:
+            # fig = plt.figure(i, figsize=(10, 10))
+            # plt.axis('off')
+            wordcloud = WordCloud(background_color='white',
+                                  width=200, height=100,  
+                                  max_words=200,
+                                  max_font_size=40, 
+                                  scale=3,
+                                  random_state=1 # chosen at random by flipping a coin; it was heads
+                                  ).generate(str(data))
+            # plot data
+            wordcloud.to_file(os.path.join(settings.MEDIA_ROOT, 'word_cloud_images', f'{i}.jpg'))
+            # plt.savefig(os.path.join(settings.MEDIA_ROOT, 'cloudword_images', f'{i}.jpg'))
+        except:
+            print('Member has not sent any message or Unknown characters in messages')
+            src = os.path.join(settings.STATIC_ROOT, 'no_message.jpg')
+            dst = os.path.join(settings.MEDIA_ROOT, 'word_cloud_images', f'{i}.jpg')
+            copyfile(src, dst)
+
 def home(request):
     if request.method == 'POST' and request.FILES['chat_file']:
         # form = UploadChatFileForm(request.POST, request.FILES)
@@ -353,7 +401,8 @@ def home(request):
         each_month_data = sent_messages_over_time(data_frame, authors)
         # find active timing of the member
         time_wise_messages = member_chatting_time(data_frame, authors)
-        
+        # word cloud plot
+        display_wordcloud(messages_df, authors)
         # ! save data to session to send this data graphs of which day most day
         request.session['authors_days'] = authors_days
         request.session['group_days'] = group_days
