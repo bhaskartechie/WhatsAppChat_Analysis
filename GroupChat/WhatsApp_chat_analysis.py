@@ -51,7 +51,7 @@ def get_data_point(current_line):
     return date_from_line, time_from_line, author_from_line, message_from_line
 
 
-def split_count(text):
+def split_count_emoji(text):
     emoji_list = []
     # data = re.findall(r'\X', text)
     for word in text:
@@ -93,8 +93,7 @@ def chat_analysis_main(filename):
                 message_buffer.append(message)
             else:
                 message_buffer.append(line)
-        parsed_data.append(
-            [f'{date} {time}', author, ' '.join(message_buffer)])
+        parsed_data.append([f'{date} {time}', author, ' '.join(message_buffer)])
     # Initializing a pandas Dataframe.
     data_frame = pd.DataFrame(parsed_data, columns=[
                               'Date', 'Author', 'Message'])
@@ -102,13 +101,11 @@ def chat_analysis_main(filename):
     # by default month showing as day and vice versa to emilinate apply this
     data_frame['Date'] = data_frame['Date'].dt.strftime('%d/%m/%Y %H:%M:%S')
     data_frame["Date"] = pd.to_datetime(data_frame["Date"])
-    data_frame["emoji"] = data_frame["Message"].apply(split_count)
     url_pattern = r'(https?://\S+)'
     data_frame['isURL'] = data_frame.Message.apply(
         lambda x: re.findall(url_pattern, x)).str.len()
     data_frame['isMedia'] = (data_frame['Message'] == '<Media omitted>').apply(int)
     media_messages_df = data_frame[data_frame['Message'] == '<Media omitted>']
-    messages_df = data_frame.drop(media_messages_df.index)
     
     # This is the filter for deleted messages of author
     def deleted_filter(s):
@@ -124,15 +121,26 @@ def chat_analysis_main(filename):
         lambda s: len(s))
     data_frame['Word_Count'] = data_frame['Message'].apply(
         lambda s: len(s.split(' ')))
-    # Ignoring 1) deleted 2)media 3) message word count more less tha 10 words 4) url 5) none author 
+    # Ignoring 1) deleted 
+    #          2) media
+    #          3) message word count more less tha 10 words for typed
+    #          4) url 
+    #          5) none author 
     filter_typed =  data_frame[(data_frame['isDeleted'] == 0) & (data_frame['isMedia'] == 0) & \
                     (data_frame['Word_Count'] < 10) & (data_frame['isURL'] == 0) & (data_frame['Author'].notnull())]
     filter_forwarded =  data_frame[(data_frame['isDeleted'] == 0) & (data_frame['isMedia'] == 0) & \
                     (data_frame['Word_Count'] > 10) & (data_frame['isURL'] == 0) & (data_frame['Author'].notnull())] 
     
+    # make separate column for typed messages
     data_frame['Typed'] = filter_typed['Message']
+    # replace nan values with empty string
+    data_frame.Typed = data_frame.Typed.fillna('')
+    # make separate column for forwarded messages
     data_frame['Forwarded'] = filter_forwarded['Message']
-
+    # replace nan values with empty string
+    data_frame.Forwarded = data_frame.Forwarded.fillna('')
+    # find the emojies of the typed messages
+    data_frame["Emoji"] = data_frame["Typed"].apply(split_count_emoji)
     # get group members
     authors = data_frame.Author.unique()
     authors = authors[authors != None]  # remove None author
@@ -152,7 +160,7 @@ def chat_analysis_main(filename):
     total_time_spent_min = [round(
         (np.sum(author_msgs[i]['Word_Count'])) / avg_typing_speed, 2) for i in author_range]
     # individual emojies count of the each member in list
-    num_emojis = [sum(author_msgs[i]['emoji'].str.len()) for i in author_range]
+    num_emojis = [sum(author_msgs[i]['Emoji'].str.len()) for i in author_range]
     # individual urls sent of the each member in list
     num_urls = [sum(author_msgs[i]['isURL']) for i in author_range]
     # individual media messages count of the each member in list

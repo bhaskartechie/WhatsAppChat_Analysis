@@ -225,10 +225,10 @@ def plot_members_stats(request, key):
     emojies = emojies_sent[author]
     emojies_sent_mem = [list(emojies.keys()), list(emojies.values())]
     # member sent data each month
-    each_month_data = request.session['each_month_data']
-    each_month_data = each_month_data[author]
+    each_month_data_member = request.session['each_month_data_member']
+    each_month_data_member = each_month_data_member[author]
     # bar plot of the active time for each member 
-    time_wise_messages = request.session['time_wise_messages']
+    time_wise_messages = request.session['member_chat_time']
     member_times = time_wise_messages[author]
     member_timings = [list(member_times.keys()), list(member_times.values())]
     image_path = f'word_cloud_images/{key}.jpg'
@@ -236,7 +236,7 @@ def plot_members_stats(request, key):
                             {'author': author,
                             'author_sent': author_sent,
                             'emojies_sent_mem': emojies_sent_mem,
-                            'each_month_data': each_month_data,
+                            'each_month_data_member': each_month_data_member,
                             'member_timings': member_timings,
                             'image_path': image_path, })
 
@@ -256,17 +256,20 @@ def plot_group_stats(request):
 
 
 def emoji_stats(data_frame, authors):
-    emojies_sent = OrderedDict()
+    emojies_sent_member = OrderedDict()
     for sender in authors:
         # get author dataframe
         author_df = data_frame[data_frame['Author'] == sender]
         # filter only emojies to list
-        total_emojis_list = list([a for b in author_df.emoji for a in b])
+        total_emojis_list = list([a for b in author_df.Emoji for a in b])
         # count the each emojies count
         emoji_dict = dict(Counter(total_emojis_list))
         # create another dict for the each author
-        emojies_sent[sender] = emoji_dict
-    return emojies_sent
+        emojies_sent_member[sender] = emoji_dict
+    # calculate the all emojies
+    all_emojies = data_frame['Emoji'].to_list()
+    all_emojies = dict(Counter([item for sublist in all_emojies for item in sublist]))
+    return emojies_sent_member, all_emojies
 
 def sent_messages_over_time(df, members):
     # initialize ordereddict for maintaining order of values
@@ -286,11 +289,25 @@ def sent_messages_over_time(df, members):
         values_list = list(data.values())
         # insert all data 
         month_wise_data[sender] = [months_list, values_list]
-
-    return month_wise_data
+    # remove none author
+    all_messages = df[df['Author'].notnull()]
+    # group sent messages by months
+    months_data = all_messages.groupby([all_messages['Date'].dt.year, all_messages['Date'].dt.month]).agg({'Message':len}).to_dict()
+    # get data 
+    data = months_data['Message']
+    # months list
+    months_list = list(data.keys())
+    # swap month to year by converting month number to string
+    months_list = [(get_month(t[1]), t[0]) for t in months_list]
+    # sent messages
+    values_list = list(data.values())
+    # its group activity
+    group_activity = [months_list, values_list]
+    return month_wise_data, group_activity
    
-def member_chatting_time(df, members):
-
+def chatting_time(df, members):
+    # %%
+    # individual statistics
     time_wise_data = OrderedDict()
     for sender in members:
         # get each sender dataframe from actual dataframe
@@ -307,7 +324,19 @@ def member_chatting_time(df, members):
                                   'Afternoon(1pm-5pm)':afternoon,
                                   'Evening(5pm-10pm)': evening,
                                   'Night(10pm-4am)': night, }
-    return time_wise_data
+    # %%
+    # overall statistics
+    # all messages except none type
+    all_messages = df[df['Author'].notnull()]
+    early_morning = len(all_messages[all_messages.Date.dt.strftime('%H:%M:%S').between('04:00:00','08:00:00')])
+    morning = len(all_messages[all_messages.Date.dt.strftime('%H:%M:%S').between('08:00:00','13:00:00')])
+    afternoon = len(all_messages[all_messages.Date.dt.strftime('%H:%M:%S').between('13:00:00','17:00:00')])
+    evening = len(all_messages[all_messages.Date.dt.strftime('%H:%M:%S').between('17:00:00','22:00:00')])
+    night = len(all_messages[all_messages.Date.dt.strftime('%H:%M:%S').between('22:00:00','23:59:00')]) + \
+            len(all_messages[all_messages.Date.dt.strftime('%H:%M:%S').between('00:00:00','04:00:00')])
+    group_chating_time = [['Early Morning(4am-8am)', 'Morning(8am-1pm)', 'Afternoon(1pm-5pm)',
+                           'Evening(5pm-10pm)', 'Night(10pm-4am)'], [early_morning, morning, afternoon, evening, night]]
+    return time_wise_data, group_chating_time
 
 
 def display_wordcloud(data_frame, authors):
@@ -324,21 +353,13 @@ def display_wordcloud(data_frame, authors):
     for i, sender in enumerate(authors):
         # get sender message dataframe
         sender_df = data_frame[data_frame['Author'] == sender]
-        # filter the sent messages as
-        # 1) ignore shared urls
-        # 2) ignore deleted messages
-        # 3) If the word count of the sent message is less than 10 words its considered as
-        #  typed message not a copied/forwarded message
-        filtered_df = sender_df[(sender_df['isURL'] == 0) & (sender_df['isDeleted'] == 0) & 
-                                (sender_df['Word_Count'] < 10) & (sender_df['isMedia'] == 0)]
+
         # join all text together as data
-        data = ' '.join(filtered_df['Message'].to_list())
+        data = ' '.join(sender_df['Typed'].to_list())
         
         # ! pending with emoji inclusion
         emoji_path = os.path.join(settings.MEDIA_ROOT, 'NotoColorEmoji.ttf')
         try:
-            # fig = plt.figure(i, figsize=(10, 10))
-            # plt.axis('off')
             wordcloud = WordCloud(background_color='white',
                                   width=200, height=100,  
                                   max_words=200,
@@ -348,12 +369,27 @@ def display_wordcloud(data_frame, authors):
                                   ).generate(str(data))
             # plot data
             wordcloud.to_file(os.path.join(settings.MEDIA_ROOT, 'word_cloud_images', f'{i}.jpg'))
-            # plt.savefig(os.path.join(settings.MEDIA_ROOT, 'cloudword_images', f'{i}.jpg'))
         except:
-            print('Member has not sent any message or Unknown characters in messages')
             src = os.path.join(settings.STATIC_ROOT, 'no_message.jpg')
             dst = os.path.join(settings.MEDIA_ROOT, 'word_cloud_images', f'{i}.jpg')
             copyfile(src, dst)
+    
+    data = ' '.join(data_frame['Typed'].to_list())
+    try:
+        wordcloud = WordCloud(background_color='white',
+                                width=200, height=100,  
+                                max_words=200,
+                                max_font_size=40, 
+                                scale=3,
+                                random_state=1 # chosen at random by flipping a coin; it was heads
+                                ).generate(str(data))
+        # plot data
+        wordcloud.to_file(os.path.join(settings.MEDIA_ROOT, 'word_cloud_images', 'group_word_cloud.jpg'))
+    except:
+        src = os.path.join(settings.STATIC_ROOT, 'no_message.jpg')
+        dst = os.path.join(settings.MEDIA_ROOT, 'word_cloud_images', 'group_word_cloud.jpg')
+        copyfile(src, dst)
+    
 
 def home(request):
     if request.method == 'POST' and request.FILES['chat_file']:
@@ -375,7 +411,7 @@ def home(request):
         authors = data_frame.Author.unique()
         authors = authors[authors != None]
         total_messages = data_frame.shape[0]
-        emojis = sum(data_frame['emoji'].str.len())
+        emojis = sum(data_frame['Emoji'].str.len())
         links = np.sum(data_frame.isURL)
         deleted_messages = np.sum(data_frame.isDeleted)
         media_messages = data_frame[data_frame['Message']
@@ -399,20 +435,27 @@ def home(request):
         # sent messages on which day of the week for each each member and whole group
         authors_days, group_days = find_day_of_chat(data_frame, authors)
         # numbers of emojies in each member sent messages
-        emoji_sent_author = emoji_stats(data_frame, authors)
+        emoji_sent_author, emoji_sent_group = emoji_stats(data_frame, authors)
         # count of the sent messages of each month from joining 
-        each_month_data = sent_messages_over_time(data_frame, authors)
+        each_month_data_member, each_month_data_group = sent_messages_over_time(data_frame, authors)
         # find active timing of the member
-        time_wise_messages = member_chatting_time(data_frame, authors)
+        member_chat_time, group_chat_time = chatting_time(data_frame, authors)
         # word cloud plot
         display_wordcloud(data_frame, authors)
         # ! save data to session to send this data graphs of which day most day
+        # members statistics
         request.session['authors_days'] = authors_days
+        request.session['emoji_sent_author'] = emoji_sent_author
+        request.session['each_month_data_member'] = each_month_data_member
+        request.session['member_chat_time'] = member_chat_time
+        request.session['emoji_sent_group'] = emoji_sent_group
+        # group statistics
         request.session['group_days'] = group_days
         request.session['present_group_name'] = present_group_name
-        request.session['emoji_sent_author'] = emoji_sent_author
-        request.session['each_month_data'] = each_month_data
-        request.session['time_wise_messages'] = time_wise_messages
+        request.session['each_month_data_group'] = each_month_data_group
+        request.session['group_chat_time'] = group_chat_time
+
+
 
         msg_statistics = {'Total messages': total_messages,
                           'Media messages': media_messages,

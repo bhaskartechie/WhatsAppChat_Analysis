@@ -14,10 +14,10 @@
     new Chart(document.getElementById("sent_messages_line"), {
         type: "line",
         data: {
-          labels: {{each_month_data.0|safe}},
+          labels: {{each_month_data_member.0|safe}},
           datasets: [
             {
-              data: {{each_month_data.1|safe}}
+              data: {{each_month_data_member.1|safe}}
             },
           ],
         },
