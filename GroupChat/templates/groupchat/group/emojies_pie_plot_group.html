@@ -1,28 +1,23 @@
 {% block content %}
 <p style="text-align: center; font-size: 15px; color: gray">
-  (Chatting time)
+  (Emojies counter)
+
 <p>Hi</p>
 <div
   id="container"
   style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto"
 >
-  <canvas id="chatting_time">{{author}} </canvas>
+  <canvas id="pie_chart_group">{{author}} </canvas>
 </div>
 <body>
   <script>
-    new Chart(document.getElementById("chatting_time"), {
-        type: "bar",
+    new Chart(document.getElementById("pie_chart_group"), {
+        type: "pie",
         data: {
-          labels: {{member_timings.0|safe}},
+          labels: {{emojies_sent_group.0|safe}},
           datasets: [
             {
-            backgroundColor: [
-                "#3e95cd",
-                "green",
-                "#3cba9f",
-                "#e8c3b9",
-                "red"],
-              data: {{member_timings.1|safe}}
+              data: {{emojies_sent_group.1|safe}}
             },
           ],
         },

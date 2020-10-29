@@ -6,18 +6,18 @@
 <div
   id="container"
   style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto">
-  <canvas id="sample-chart">{{author}} </canvas>
+  <canvas id="week_wise_messages">{{author}} </canvas>
 </div>
-{% include 'groupchat/members/sent_messages_from_joining.html' %}
-{% include 'groupchat/members/chatting_time.html' %}
-{% include 'groupchat/members/display_word_cloud.html' %}
-{% include 'groupchat/members/emojies_pie_plot.html' %}
+{% include 'groupchat/group/sent_messages_from_starting.html' %}
+{% include 'groupchat/group/chatting_time_group.html' %}
+{% include 'groupchat/group/display_word_cloud_group.html' %}
+{% include 'groupchat/group/emojies_pie_plot_group.html' %}
 <body>
   <script>
-    new Chart(document.getElementById("sample-chart"), {
+    new Chart(document.getElementById("week_wise_messages"), {
         type: "bar",
         data: {
-          labels: {{author_sent.0|safe}},
+          labels: {{group_days.0|safe}},
           datasets: [
             {
               backgroundColor: [
@@ -29,7 +29,7 @@
                 "green",
                 "red",
               ],
-              data: {{author_sent.1|safe}}
+              data: {{group_days.1|safe}}
             },
           ],
         },

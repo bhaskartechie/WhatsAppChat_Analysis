@@ -10,7 +10,7 @@ app_name = 'GroupChat'
 urlpatterns = [
     path('', views.home, name='GroupChat'),
     path('<int:key>/', views.plot_members_stats, name='draw_graph'),
-    path('group_sent_days/', views.plot_group_stats, name='draw_graph_group'),
+    path('group_graphs/', views.plot_group_stats, name='draw_graph_group'),
 
     # path('population-chart/', views.find_day_of_chat, name='population-chart')
 ]#+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

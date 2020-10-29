@@ -9,6 +9,8 @@ import numpy as np
 # import matplotlib.pyplot as plt
 # import plotly.express as px
 
+#  this is the global variable for calculate the average word speed of the group memeber
+avg_words = 10
 
 def starts_with_date_and_time(s):
     # regex pattern for date.(Works only for android. IOS Whatsapp export format is different. Will update the code soon
@@ -17,24 +19,6 @@ def starts_with_date_and_time(s):
     if result:
         return True
     return False
-
-
-# Finds username of any given format.
-# def find_author(s):
-#     patterns = ['([\w]+):',  # First Name
-#                 '([\w]+[\s]+[\w]+):',  # First Name + Last Name
-#                 # First Name + Middle Name + Last Name
-#                 '([\w]+[\s]+[\w]+[\s]+[\w]+):',
-#                 '([+]\d{2} \d{5} \d{5}):',  # Mobile Number (India)
-#                 '([+]\d{2} \d{3} \d{3} \d{4}):',  # Mobile Number (US)
-#                 '([\w]+)[\u263a-\U0001f999]+:', ]  # Name and Emoji
-
-    # pattern = '^' + '|'.join(patterns)
-    # result = re.match(pattern, s)
-    # if result:
-    #     return True
-    # return False
-
 
 def get_data_point(current_line):
     split_line = current_line.split(' - ')
@@ -53,7 +37,6 @@ def get_data_point(current_line):
 
 def split_count_emoji(text):
     emoji_list = []
-    # data = re.findall(r'\X', text)
     for word in text:
         if any(char in emoji.UNICODE_EMOJI for char in word):
             emoji_list.append(word)
@@ -98,7 +81,7 @@ def chat_analysis_main(filename):
     data_frame = pd.DataFrame(parsed_data, columns=[
                               'Date', 'Author', 'Message'])
     data_frame["Date"] = pd.to_datetime(data_frame["Date"])
-    # by default month showing as day and vice versa to emilinate apply this
+    # by default month showing as day and vice versa to eliminate apply this
     data_frame['Date'] = data_frame['Date'].dt.strftime('%d/%m/%Y %H:%M:%S')
     data_frame["Date"] = pd.to_datetime(data_frame["Date"])
     url_pattern = r'(https?://\S+)'
@@ -127,9 +110,9 @@ def chat_analysis_main(filename):
     #          4) url 
     #          5) none author 
     filter_typed =  data_frame[(data_frame['isDeleted'] == 0) & (data_frame['isMedia'] == 0) & \
-                    (data_frame['Word_Count'] < 10) & (data_frame['isURL'] == 0) & (data_frame['Author'].notnull())]
+                    (data_frame['Word_Count'] < avg_words) & (data_frame['isURL'] == 0) & (data_frame['Author'].notnull())]
     filter_forwarded =  data_frame[(data_frame['isDeleted'] == 0) & (data_frame['isMedia'] == 0) & \
-                    (data_frame['Word_Count'] > 10) & (data_frame['isURL'] == 0) & (data_frame['Author'].notnull())] 
+                    (data_frame['Word_Count'] > avg_words) & (data_frame['isURL'] == 0) & (data_frame['Author'].notnull())] 
     
     # make separate column for typed messages
     data_frame['Typed'] = filter_typed['Message']

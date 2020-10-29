@@ -15,7 +15,8 @@ from shutil import copyfile, rmtree
 
 # from django.views.generic import TemplateView
 # from chartjs.views.lines import BaselLineChartView
-
+#  this is the global variable for calculate the average word speed of the group memeber
+avg_words = 10
 
 def create_local_chat_file(fd):
     chat_filename = os.path.join(settings.MEDIA_ROOT, 'temp_chat_file.txt')
@@ -240,19 +241,25 @@ def plot_members_stats(request, key):
                             'member_timings': member_timings,
                             'image_path': image_path, })
 
-
+# this function to send the data to client
 def plot_group_stats(request):
     sent_days = request.session['group_days']
-    group_name = request.session['present_group_name']
     group_days = [list(sent_days.keys()), list(sent_days.values())]
-    emojies_sent = request.session['emoji_sent_author']
-    author = list(emojies_sent)
-    emojies = emojies_sent[author]
-    emojies_sent_grp = [list(emojies.keys()), list(emojies.values())]
+    group_name = request.session['present_group_name']   
+    each_month_data_group = request.session['each_month_data_group'] 
+    group_chat_time = request.session['group_chat_time']
+    members_stats = request.session['members_stats']
+    emoji_sent_group = request.session['emoji_sent_group']
+    emoji_sent_group = [list(emoji_sent_group.keys()), list(emoji_sent_group.values())]
+    word_cloud_image = 'word_cloud_images/group_word_cloud.jpg'
     return render(request, 'groupchat/group/base_groups.html', 
-                            {'emojies_sent_group': emojies_sent_grp,
-                            'author': group_name,
-                            'author_sent': group_days, })
+                            {'emojies_sent_group': emoji_sent_group,
+                            'group_name': group_name,
+                            'group_days': group_days,
+                            'each_month_data_group': each_month_data_group,
+                            'group_chat_time': group_chat_time,
+                            'members_stats': members_stats,
+                            'word_cloud_image': word_cloud_image, })
 
 
 def emoji_stats(data_frame, authors):
@@ -358,8 +365,9 @@ def display_wordcloud(data_frame, authors):
         data = ' '.join(sender_df['Typed'].to_list())
         
         # ! pending with emoji inclusion
-        emoji_path = os.path.join(settings.MEDIA_ROOT, 'NotoColorEmoji.ttf')
+        # emoji_path = os.path.join(settings.MEDIA_ROOT, 'NotoColorEmoji.ttf')
         try:
+            # word cloud calling
             wordcloud = WordCloud(background_color='white',
                                   width=200, height=100,  
                                   max_words=200,
@@ -390,6 +398,49 @@ def display_wordcloud(data_frame, authors):
         dst = os.path.join(settings.MEDIA_ROOT, 'word_cloud_images', 'group_word_cloud.jpg')
         copyfile(src, dst)
     
+def calculate_each_member_stats(df, author):
+    # initialize ordered dictionary to store results
+    all_members_stats = OrderedDict()
+    all_members_stats['No_msgs'] = {}
+    all_members_stats['No_links'] = {}
+    all_members_stats['No_media'] = {}
+    all_members_stats['No_deleted'] = {}
+    all_members_stats['No_forward'] = {}
+    all_members_stats['No_typed'] = {}
+    all_members_stats['No_emoji'] = {}
+    all_members_stats['No_words'] = {}
+
+    for member in author:
+        # get the member data from the whole dataframe
+        sender_df = df[df['Author'] == member]
+        # calculate the member statistics 
+        # 1) Number of sent messages
+        no_messages = len(sender_df['Message'])
+        all_members_stats['No_msgs'].update({member: no_messages})
+        # 2) Number of shared links
+        no_links = sum(sender_df['isURL'])
+        all_members_stats['No_links'].update({member: no_links})
+        # 3) Number of sent media messages(Image, Audio, Video, Document, Contacts)
+        no_media = sum(sender_df['isMedia'])
+        all_members_stats['No_media'].update({member: no_media})
+        # 4) Number of deleted messages
+        no_deleted = sum(sender_df['isDeleted'])
+        all_members_stats['No_deleted'].update({member: no_deleted})
+        # 5) Number of forwarded messages
+        no_forwarded = len(sender_df[(sender_df['Forwarded'] != '')])
+        all_members_stats['No_forward'].update({member: no_forwarded})
+        # 6) Number of typed messages
+        no_typed = len(sender_df[(sender_df['Typed'] != '')])
+        all_members_stats['No_typed'].update({member: no_typed})
+        # 7) number of emojies used
+        no_emojies = sum(sender_df['Emoji'].apply(len))
+        all_members_stats['No_emoji'].update({member: no_emojies})
+        # 8) average number of words per messages
+        no_words_per_msg = sender_df['Typed'].apply(lambda s: len(s.split(' ')))
+        avg_no_words_per_msg = sum(no_words_per_msg)/max(no_words_per_msg)
+        all_members_stats['No_words'].update({member: round(avg_no_words_per_msg, 2)})
+        # 9) time spent on whatsapp approximately
+    return all_members_stats
 
 def home(request):
     if request.method == 'POST' and request.FILES['chat_file']:
@@ -442,19 +493,22 @@ def home(request):
         member_chat_time, group_chat_time = chatting_time(data_frame, authors)
         # word cloud plot
         display_wordcloud(data_frame, authors)
+        # for group graph display calculate all statistics of the group members
+        members_stats = calculate_each_member_stats(data_frame, authors)
         # ! save data to session to send this data graphs of which day most day
         # members statistics
         request.session['authors_days'] = authors_days
         request.session['emoji_sent_author'] = emoji_sent_author
         request.session['each_month_data_member'] = each_month_data_member
         request.session['member_chat_time'] = member_chat_time
-        request.session['emoji_sent_group'] = emoji_sent_group
+        
         # group statistics
         request.session['group_days'] = group_days
         request.session['present_group_name'] = present_group_name
         request.session['each_month_data_group'] = each_month_data_group
         request.session['group_chat_time'] = group_chat_time
-
+        request.session['members_stats'] = members_stats
+        request.session['emoji_sent_group'] = emoji_sent_group
 
 
         msg_statistics = {'Total messages': total_messages,

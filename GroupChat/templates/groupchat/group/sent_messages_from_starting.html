@@ -1,28 +1,22 @@
 {% block content %}
 <p style="text-align: center; font-size: 15px; color: gray">
-  (Chatting time)
+  (Sent messages)
 <p>Hi</p>
 <div
   id="container"
   style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto"
 >
-  <canvas id="chatting_time">{{author}} </canvas>
+  <canvas id="group_sent_messages_line">{{author}} </canvas>
 </div>
 <body>
   <script>
-    new Chart(document.getElementById("chatting_time"), {
-        type: "bar",
+    new Chart(document.getElementById("group_sent_messages_line"), {
+        type: "line",
         data: {
-          labels: {{member_timings.0|safe}},
+          labels: {{each_month_data_group.0|safe}},
           datasets: [
             {
-            backgroundColor: [
-                "#3e95cd",
-                "green",
-                "#3cba9f",
-                "#e8c3b9",
-                "red"],
-              data: {{member_timings.1|safe}}
+              data: {{each_month_data_group.1|safe}}
             },
           ],
         },
