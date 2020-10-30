@@ -98,3 +98,67 @@ ol {
 .p_stats_draw {
   text-align: center;
 }
+#submit-button {
+  width:50%;
+  height:100%;
+  color: white;
+  background:rgb(118, 185, 109);
+  font-weight: bold; 
+  left: 150%;
+  top: 60%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  border: none;
+  outline: none;
+}
+#submit-button:hover {
+  background: green;
+  cursor: pointer;
+}
+.browse-container {
+  left: 38%;
+  top: 22%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+}
+
+.upload-box {
+  font-size: 16px;
+  background: white;
+  width: 400px;
+  outline: none;
+}
+
+::-webkit-file-upload-button {
+  color: white;
+  background: #76b96d;
+  padding: 10px;
+  border: none;
+  outline: none;
+}
+::-webkit-file-upload-button:hover {
+  background: green;
+  cursor: pointer;
+}
+
+.upload-button {
+  left: 150%;
+  top: 60%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  color:  #438a5e;
+  border: none;
+  outline: none;
+}
+.upload-button:hover {
+  background: green;
+}
+
+.content-class{
+  top: 55%;
+  position: relative;
+}
+.title-display {
+  top: 50%;
+  
+}

@@ -438,9 +438,10 @@ def calculate_each_member_stats(df, author):
         all_members_stats['No_emoji'].update({member: no_emojies})
         # 8) average number of words per messages
         no_words_per_msg = sender_df['Typed'].apply(lambda s: len(s.split(' ')))
-        avg_no_words_per_msg = sum(no_words_per_msg)/max(no_words_per_msg)
+        avg_no_words_per_msg = sum(no_words_per_msg)/len(no_words_per_msg)
         all_members_stats['No_words'].update({member: round(avg_no_words_per_msg, 2)})
         # 9) time spent on whatsapp approximately
+
     # converting dictionary to lists so that list can be given directly in the template
     all_members_stats['No_msgs'] = [list(all_members_stats['No_msgs'].keys()),
                                   list(all_members_stats['No_msgs'].values())]
@@ -466,9 +467,7 @@ def calculate_each_member_stats(df, author):
 
 def home(request):
     if request.method == 'POST' and request.FILES['chat_file']:
-        # form = UploadChatFileForm(request.POST, request.FILES)
-        # if form.is_valid():
-        # filename = r"C:\Users\Administrator\Work\Whats_App_Chat_Analysis\WhatAppChat.txt"
+        
         chat_filename = create_local_chat_file(request.FILES['chat_file'])
         data_frame, member_stats = chat_analysis_main(
             chat_filename)
