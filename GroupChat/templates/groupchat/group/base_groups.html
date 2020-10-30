@@ -1,17 +1,22 @@
 {% extends 'base.html' %} {% block content %}
 <h2>{{author}}</h2>
-<p class='p_stats_draw'>
-  (Total messages sent on days)
+<p class="p_stats_draw">
+  Most sent messages in a day of the week
 </p>
 <div
   id="container"
   style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto">
   <canvas id="week_wise_messages">{{author}} </canvas>
 </div>
-{% include 'groupchat/group/sent_messages_from_starting.html' %}
+{% include 'groupchat/group/sent_messages_from_starting_group.html' %}
 {% include 'groupchat/group/chatting_time_group.html' %}
 {% include 'groupchat/group/display_word_cloud_group.html' %}
 {% include 'groupchat/group/emojies_pie_plot_group.html' %}
+
+{% for key, value in members_stats.items %}
+  {% include 'groupchat/group/each_memeber_stats_group.html' %}    
+{% endfor %}
+
 <body>
   <script>
     new Chart(document.getElementById("week_wise_messages"), {
@@ -43,6 +48,13 @@
             display: false,
               position: 'top',
            },
+          scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+            },
         },
       });
   </script>

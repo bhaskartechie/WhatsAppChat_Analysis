@@ -249,6 +249,7 @@ def plot_group_stats(request):
     each_month_data_group = request.session['each_month_data_group'] 
     group_chat_time = request.session['group_chat_time']
     members_stats = request.session['members_stats']
+
     emoji_sent_group = request.session['emoji_sent_group']
     emoji_sent_group = [list(emoji_sent_group.keys()), list(emoji_sent_group.values())]
     word_cloud_image = 'word_cloud_images/group_word_cloud.jpg'
@@ -440,6 +441,27 @@ def calculate_each_member_stats(df, author):
         avg_no_words_per_msg = sum(no_words_per_msg)/max(no_words_per_msg)
         all_members_stats['No_words'].update({member: round(avg_no_words_per_msg, 2)})
         # 9) time spent on whatsapp approximately
+    # converting dictionary to lists so that list can be given directly in the template
+    all_members_stats['No_msgs'] = [list(all_members_stats['No_msgs'].keys()),
+                                  list(all_members_stats['No_msgs'].values())]
+    all_members_stats['No_links'] = [list(all_members_stats['No_links'].keys()),
+                                  list(all_members_stats['No_links'].values())]
+    all_members_stats['No_media'] = [list(all_members_stats['No_media'].keys()),
+                                  list(all_members_stats['No_media'].values())]
+    all_members_stats['No_deleted'] = [list(all_members_stats['No_deleted'].keys()),
+                                  list(all_members_stats['No_deleted'].values())]
+    all_members_stats['No_forward'] = [list(all_members_stats['No_forward'].keys()),
+                                  list(all_members_stats['No_forward'].values())]
+    all_members_stats['No_typed'] = [list(all_members_stats['No_typed'].keys()),
+                                  list(all_members_stats['No_typed'].values())]
+    all_members_stats['No_emoji'] = [list(all_members_stats['No_emoji'].keys()),
+                                  list(all_members_stats['No_emoji'].values())]
+    all_members_stats['No_words'] = [list(all_members_stats['No_words'].keys()),
+                                  list(all_members_stats['No_words'].values())]
+    # members_stats['No_deleted'] = [list(members_stats['No_deleted'].keys()),
+    #                               list(members_stats['No_deleted'].values())]
+    # members_stats['No_deleted'] = [list(members_stats['No_deleted'].keys()),
+    #                               list(members_stats['No_deleted'].values())]                             
     return all_members_stats
 
 def home(request):

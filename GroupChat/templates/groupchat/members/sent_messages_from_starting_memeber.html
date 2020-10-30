@@ -1,22 +1,21 @@
 {% block content %}
-<p style="text-align: center; font-size: 15px; color: gray">
-  (Sent messages)
-<p>Hi</p>
+<p class="p_stats_draw">
+ Member number of sent messages from the group joining
+ </p>
 <div
   id="container"
-  style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto"
->
-  <canvas id="group_sent_messages_line">{{author}} </canvas>
+  style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto">
+  <canvas id="sent_messages_line">{{author}} </canvas>
 </div>
 <body>
   <script>
-    new Chart(document.getElementById("group_sent_messages_line"), {
+    new Chart(document.getElementById("sent_messages_line"), {
         type: "line",
         data: {
-          labels: {{each_month_data_group.0|safe}},
+          labels: {{each_month_data_member.0|safe}},
           datasets: [
             {
-              data: {{each_month_data_group.1|safe}}
+              data: {{each_month_data_member.1|safe}}
             },
           ],
         },

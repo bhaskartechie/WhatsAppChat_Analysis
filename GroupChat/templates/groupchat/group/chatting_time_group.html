@@ -1,12 +1,10 @@
 {% block content %}
-<p style="text-align: center; font-size: 15px; color: gray">
-  (Chatting time)
-
-<p>Hi</p>
+<p class="p_stats_draw">
+  Group active hours
+</p>
 <div
   id="container"
-  style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto"
->
+  style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto">
   <canvas id="chatting_time_group">{{author}} </canvas>
 </div>
 <body>
@@ -40,8 +38,15 @@
            plugins: {
             colorschemes: {
                 scheme: 'brewer.Paired12'
-            }
-        },
+              }
+            },
+            scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+              }]
+            },
         },
       });
   </script>
