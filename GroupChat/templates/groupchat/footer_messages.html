@@ -1,0 +1,14 @@
+{%extends "base.html" %} {% block content %}
+<h4 style="color:green; left:100px;"> Generate chat file from WhatsApp  </h4>
+<p>Open WhatsApp > Open your desired Group > press vertical three dots >
+More > Export chat> Select WITHOUT MEDIA > Share file to desktop </p>
+<h4 style="color:green; left:100px;"> Assumptions </h4>
+<ol>
+<li>If you are added in the middle of the group conversation there may a chance to loose information of group creation info </li>
+<li>Single month created group sent messages over time will not be displayed</li>
+<li>If the word count of the sent message is less than 10 words its considered as typed message not a copied/forwarded message</li> 
+<li>Emojies are counted for the only to typed messages</li>
+<li><span style="color:red;">*</span> items are not 100% correct due to taken calculations but it is sure for 95 to 99%</li>
+</ol>
+<h3 style="text-align: center;"><a href="{% url 'GroupChat:GroupChat'%}">back to <strong>HOME</strong></a></h3>
+{% endblock %}

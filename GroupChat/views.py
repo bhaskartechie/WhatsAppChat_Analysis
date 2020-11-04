@@ -465,6 +465,10 @@ def calculate_each_member_stats(df, author):
     #                               list(members_stats['No_deleted'].values())]                             
     return all_members_stats
 
+
+def call_footer(request):
+    return render(request, 'groupchat/footer_messages.html')
+    
 def home(request):
     if request.method == 'POST' and request.FILES['chat_file']:
         
@@ -555,3 +559,4 @@ def home(request):
     # else:
     #     form = UploadChatFileForm()
     return render(request, 'base.html')
+
