@@ -1,3 +1,4 @@
+
 {%extends "base.html" %} {% block content %}
 <div class='title-display'><h2 ><strong>{{present_group_name}}</strong></div>
 <p>
@@ -23,7 +24,8 @@
   ><font color="grey" size="2px">Left members </font><span style="font-size: 35px; color: red;"> &#9632;</span></font
   ><font color="grey" size="2px">Removed members </font>
 </ol>
-<h3><a href="{% url 'GroupChat:draw_graph_group'%}">Group statistics</a></h3>
+<p class="blink"><a href="{% url 'GroupChat:draw_graph_group'%}">Group statistics </a>👈</p>
+
 <table id="msg_stats_table">
   <tr>
     <th>Parameter</th>
@@ -31,7 +33,7 @@
   </tr>
   {% for key, value in msg_statistics.items %}
   <tr>
-    <td style="min-width:150px; background-color:#e8d548;">{{key}}</td>
+    <td style="min-width:150px;">{{key}}</td>
     <td>{{value}}</td>
   </tr>
   {% endfor %}
@@ -73,11 +75,11 @@
     <th>Media files</th>
     <th>Deleted messages</th>
     <th>Average words per message</th>
-    <th>Total Time spent(min)</th>
+    <th>Total Time spent(min)<sup style="vertical-align: super; font-size: small;color: red;">*</sup></th>
   </tr>
   {% for key, value in member_stats.items %}
   <tr>
-    <td style="min-width:180px; background-color:#e8d548;"><a href="{% url 'GroupChat:draw_graph' forloop.counter0 %}">{{key}}</a></td>
+    <td style="min-width:180px; background-color:;"><a href="{% url 'GroupChat:draw_graph' forloop.counter0 %}">{{key}}</a></td>
     {% for v in value %}
     <td>{{v}}</td>
     {% endfor %}

@@ -10,22 +10,27 @@
     <script src="https://raw.githubusercontent.com/google/palette.js/master/palette.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-colorschemes"></script>
     <script src="https://unpkg.com/chartjs-plugin-colorschemes"></script>
-  
   </head>
   <body>
     <h1>WHATSAPP GROUP CHAT DATA ANALYSIS</h1>
     <div class="browse-container">
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
-        <input type="file" name="chat_file" class="upload-box" />
+        <input type="file" name="chat_file" accept=".txt"class="upload-box" required/>
         <button id="submit-button" type="submit"> 
         Upload
         </button>      
     </form>
     </div>
     <div class="content-class">
-    <br/>
+      <br/>
+      <br/>
     {% block content %} {% endblock %}
     </div>
+    <br/>
+    <br/>
+    <br/>
+    <hr class="footer_class" style="padding: 20px;">
+    <footer class="footer_class">Best viewed in the Microsoft Edge browser, For file import and data calculation details <a href="">click here </a> </footer> 
   </body>
 </html>

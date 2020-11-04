@@ -1,19 +1,25 @@
 {% extends 'base.html' %} {% block content %}
 <h2>{{author}}</h2>
-<p class="p_stats_draw">
-  Most sent messages in a day of the week
-</p>
+
 <div
   id="container"
   style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto">
+  <p class="p_stats_draw">
+  Most sent messages in a day of the week
+</p>
   <canvas id="week_wise_messages">{{author}} </canvas>
 </div>
+<br/>
 {% include 'groupchat/group/sent_messages_from_starting_group.html' %}
+<br/>
 {% include 'groupchat/group/chatting_time_group.html' %}
+<br/>
 {% include 'groupchat/group/display_word_cloud_group.html' %}
+<br/>
 {% include 'groupchat/group/emojies_pie_plot_group.html' %}
 
 {% for key, value in members_stats.items %}
+<br/>
   {% include 'groupchat/group/each_memeber_stats_group.html' %}    
 {% endfor %}
 

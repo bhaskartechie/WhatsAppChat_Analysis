@@ -46,7 +46,7 @@ ol {
   background-color: #f2f2f2;
 }
 #msg_stats_table tr:hover {
-  background-color: #ddd;
+  background-color: #B4F297;
 }
 
 #msg_stats_table th {
@@ -75,7 +75,7 @@ ol {
 }
 
 #member_stats_table tr:hover {
-  background-color: #ddd;
+  background-color: #B4F297;
 }
 
 #member_stats_table th {
@@ -97,6 +97,8 @@ ol {
 }
 .p_stats_draw {
   text-align: center;
+  position: relative;
+  margin:0 auto;
 }
 #submit-button {
   width:50%;
@@ -160,5 +162,47 @@ ol {
 }
 .title-display {
   top: 50%;
-  
+}
+
+.blink {
+  font-size: 30px;
+  font-weight: bold;
+  color: green;
+  position: relative;
+  animation: blink 1s steps(1, end) infinite;
+}
+.blink:link {
+  color: green;
+  background-color: transparent;
+}
+.blink:hover {
+  color: red;
+  background-color: transparent;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.container {
+ text-align: center;
+ justify-content: center; 
+}
+
+.footer_class {
+  font-size: 15px;
+  color: gray;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 1rem;
+  text-align: center;
 }

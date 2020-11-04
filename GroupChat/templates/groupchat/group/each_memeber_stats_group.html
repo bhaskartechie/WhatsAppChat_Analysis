@@ -1,5 +1,7 @@
 {% block content %}
-<p class="p_stats_draw">
+
+<div  id="container"  style="width: 60%;background: #c2eec4; margin: 0 auto">
+ <p class="p_stats_draw">
  {% if key == "No_msgs"  %}
  Number of messages sent by each member
  {% elif key == "No_links"%}
@@ -9,20 +11,17 @@
  {% elif key == "No_deleted"%}
  Number of deleted by each member
  {% elif key == "No_forward"%}
- Number of forwarded messages by each member*
+ Number of forwarded messages by each member<span style="color:red;">*</span>
  {% elif key == "No_typed"%}
- Number of typed messages by each member*
+ Number of typed messages by each member<span style="color:red;">*</span>
  {% elif key == "No_emoji"%}
- Number of emojies used by each member*
+ Number of emojies used by each member<span style="color:red;">*</span>
  {% elif key == "No_words"%}
- Average words used for a message by each member*
+ Average words used for a message by each member<span style="color:red;">*</span>
  {% else %}
  Key is empty !
  {% endif %}
  </p>
-<div
-  id="container"
-  style="width: 60%;background: #c2eec4; margin: 0 auto">
   <canvas id="{{key}}">{{author}} </canvas>
 </div>
 <body>
@@ -44,6 +43,13 @@
             display: false,
             text: 'This sample',
           },
+          scales: {
+            xAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+            },
           legend: {
             display: false,
               position: 'top',

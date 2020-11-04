@@ -1,10 +1,11 @@
 {% block content %}
-<p class="p_stats_draw">
-  Number of sent emojies by group members*
-</p>
+
 <div
   id="container"
   style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto">
+  <p class="p_stats_draw">
+  Number of sent emojies by group members<span style="color:red;">*</span>
+</p>
   <canvas id="pie_chart_group">{{author}} </canvas>
 </div>
 <body>

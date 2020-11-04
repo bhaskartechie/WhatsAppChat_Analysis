@@ -1,10 +1,11 @@
 {% block content %}
-<p class="p_stats_draw">
- Member number of sent messages from the group joining
- </p>
 <div
-  id="container"
+  class="container"
   style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto">
+  <p class="p_stats_draw">
+ Member sent messages from the group joining
+ </p>
+
   <canvas id="sent_messages_line">{{author}} </canvas>
 </div>
 <body>
@@ -20,7 +21,13 @@
           ],
         },
         options: {
-
+          scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+                }]
+            },
           title: {
             display: false,
             text: 'This sample',

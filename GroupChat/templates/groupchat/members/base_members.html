@@ -1,16 +1,19 @@
 {% extends 'base.html' %} {% block content %}
 <h2>{{author}}</h2>
-<p class="p_stats_draw">
+<div
+  class="container"
+  style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto">
+  <p class="p_stats_draw">
   Number of sent messages
 </p>
-<div
-  id="container"
-  style="width: 60%; padding: 20px; background: #c2eec4; margin: 0 auto">
   <canvas id="sent_messages">{{author}} </canvas>
 </div>
+<br/>
 {% include 'groupchat/members/sent_messages_from_starting_memeber.html' %}
+<br/>
 {% include 'groupchat/members/chatting_time.html' %}
 {% include 'groupchat/members/display_word_cloud.html' %}
+<br/>
 {% include 'groupchat/members/emojies_pie_plot.html' %}
 <body>
   <script>
