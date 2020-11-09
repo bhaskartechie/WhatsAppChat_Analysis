@@ -8,54 +8,62 @@ from .chat_stats_calculations import timeit, create_local_chat_file, \
     sent_messages_over_time, chatting_time, display_wordcloud, \
     calculate_each_member_stats
 
-
 def plot_members_stats(request, key):
     # member week days plot
-    sent_days = request.session['authors_days']
-    author = list(sent_days)[key]
-    author_sent = sent_days[author]
-    author_sent = [list(author_sent.keys()), list(author_sent.values())]
-    # member sent emojies
-    emojies_sent = request.session['emoji_sent_author']
-    emojies = emojies_sent[author]
-    emojies_sent_mem = [list(emojies.keys()), list(emojies.values())]
-    # member sent data each month
-    each_month_data_member = request.session['each_month_data_member']
-    each_month_data_member = each_month_data_member[author]
-    # bar plot of the active time for each member 
-    time_wise_messages = request.session['member_chat_time']
-    member_times = time_wise_messages[author]
-    member_timings = [list(member_times.keys()), list(member_times.values())]
-    image_path = f'word_cloud_images/{key}.jpg'
-    return render(request, 'groupchat/members/base_members.html', 
-                            {'author': author,
-                            'author_sent': author_sent,
-                            'emojies_sent_mem': emojies_sent_mem,
-                            'each_month_data_member': each_month_data_member,
-                            'member_timings': member_timings,
-                            'image_path': image_path, })
+    try:
+        sent_days = request.session['authors_days']
+        author = list(sent_days)[key]
+        author_sent = sent_days[author]
+        author_sent = [list(author_sent.keys()), list(author_sent.values())]
+        # member sent emojies
+        emojies_sent = request.session['emoji_sent_author']
+        emojies = emojies_sent[author]
+        emojies_sent_mem = [list(emojies.keys()), list(emojies.values())]
+        # member sent data each month
+        each_month_data_member = request.session['each_month_data_member']
+        each_month_data_member = each_month_data_member[author]
+        # bar plot of the active time for each member 
+        time_wise_messages = request.session['member_chat_time']
+        member_times = time_wise_messages[author]
+        member_timings = [list(member_times.keys()), list(member_times.values())]
+        image_path = f'word_cloud_images/{key}.jpg'
+        return render(request, 'groupchat/members/base_members.html', 
+                                {'author': author,
+                                'author_sent': author_sent,
+                                'emojies_sent_mem': emojies_sent_mem,
+                                'each_month_data_member': each_month_data_member,
+                                'member_timings': member_timings,
+                                'image_path': image_path, })
+    except Exception as e:
+        return HttpResponse(e)    
+        # return HttpResponse('<p>Something wrong at plat members statistics plot<\p>')
+
+
 
 # this function to send the data to client
 def plot_group_stats(request):
-    sent_days = request.session['group_days']
-    group_days = [list(sent_days.keys()), list(sent_days.values())]
-    group_name = request.session['present_group_name']   
-    each_month_data_group = request.session['each_month_data_group'] 
-    group_chat_time = request.session['group_chat_time']
-    members_stats = request.session['members_stats']
+    try: 
+        sent_days = request.session['group_days']
+        group_days = [list(sent_days.keys()), list(sent_days.values())]
+        group_name = request.session['present_group_name']   
+        each_month_data_group = request.session['each_month_data_group'] 
+        group_chat_time = request.session['group_chat_time']
+        members_stats = request.session['members_stats']
 
-    emoji_sent_group = request.session['emoji_sent_group']
-    emoji_sent_group = [list(emoji_sent_group.keys()), list(emoji_sent_group.values())]
-    word_cloud_image = 'word_cloud_images/group_word_cloud.jpg'
-    return render(request, 'groupchat/group/base_groups.html', 
-                            {'emojies_sent_group': emoji_sent_group,
-                            'group_name': group_name,
-                            'group_days': group_days,
-                            'each_month_data_group': each_month_data_group,
-                            'group_chat_time': group_chat_time,
-                            'members_stats': members_stats,
-                            'word_cloud_image': word_cloud_image, })
-
+        emoji_sent_group = request.session['emoji_sent_group']
+        emoji_sent_group = [list(emoji_sent_group.keys()), list(emoji_sent_group.values())]
+        word_cloud_image = 'word_cloud_images/group_word_cloud.jpg'
+        return render(request, 'groupchat/group/base_groups.html', 
+                                {'emojies_sent_group': emoji_sent_group,
+                                'group_name': group_name,
+                                'group_days': group_days,
+                                'each_month_data_group': each_month_data_group,
+                                'group_chat_time': group_chat_time,
+                                'members_stats': members_stats,
+                                'word_cloud_image': word_cloud_image, })
+    except Exception as e:
+        return HttpResponse(e)    
+        # return HttpResponse('<p>Something wrong at plat members statistics plot<\p>')
 
 
 def call_footer(request):
@@ -63,9 +71,9 @@ def call_footer(request):
 
 @timeit
 def home(request):
-    import cProfile, pstats
-    profiler = cProfile.Profile()
-    profiler.enable()
+    # import cProfile, pstats
+    # profiler = cProfile.Profile()
+    # profiler.enable()
     if request.method == 'POST' and request.FILES['chat_file']:    
         chat_filename = create_local_chat_file(request.FILES['chat_file'])
         data_frame, member_stats = chat_analysis_main(
@@ -138,9 +146,9 @@ def home(request):
                           'Total deleted messages': deleted_messages, }
         # put all outs of the the dp activities
         dp_changes = (num_dp_changes, dp_last_change, dp_last_change_by)
-        profiler.disable()
-        stats = pstats.Stats(profiler).sort_stats('cumtime')
-        stats.dump_stats(r"C:\Users\Administrator\Work\Whats_App_Chat_Analysis\profile.prof")
+        # profiler.disable()
+        # stats = pstats.Stats(profiler).sort_stats('cumtime')
+        # stats.dump_stats(r"C:\Users\Administrator\Work\Whats_App_Chat_Analysis\profile.prof")
         return render(request, 'groupchat/chat_analysis.html', {'first_msg': first_msg,
                                                                 'first_date': first_date,
                                                                 'first_time': first_time,

@@ -3,12 +3,6 @@ import pandas as pd
 import emoji
 import numpy as np
 
-
-# from collections import Counter
-# # from wordcloud import WordCloud
-# import matplotlib.pyplot as plt
-# import plotly.express as px
-
 #  this is the global variable for calculate the average word speed of the group memeber
 avg_words = 10
 

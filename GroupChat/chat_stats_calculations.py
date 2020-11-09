@@ -28,13 +28,17 @@ def timeit(method):
 
 @timeit
 def create_local_chat_file(fd):
-    chat_filename = os.path.join(settings.MEDIA_ROOT, 'temp_chat_file.txt')
-    with open(chat_filename, 'wb+') as destination:
-        for chunk in fd.chunks():
-            destination.write(chunk)
-    return chat_filename
+    try:
+        chat_filename = os.path.join(settings.MEDIA_ROOT, 'temp_chat_file.txt')
+        with open(chat_filename, 'wb+') as destination:
+            for chunk in fd.chunks():
+                destination.write(chunk)
+        return chat_filename
+    except Exception as e:
+        raise e
 
 # function to count the number of times group dp changed
+@timeit
 def group_dp_changes(df, date, created_by):
     # this i the key term to check in the dataframe
     key_term_icon = 'this group\'s icon'
@@ -56,6 +60,7 @@ def get_month(month_number):
     return months[month_number -1] 
 
 # function to count the number of times group name changed
+@timeit
 def group_name_changes(df):
     # this key term used to find the changes in the group name
     key_terms = 'changed the subject from '
@@ -78,10 +83,12 @@ def group_name_changes(df):
                                                                                                       len(second_str_pre):s.rfind(second_str_post)]]
     temp_df = data_frame["Message"].apply(filter_groupname_change)
     # remove empty list from the none data frame
+    
     return temp_df[temp_df.astype(bool)].to_list()
 
 
 # this function finds the active and left members from the group
+@timeit
 def find_active_members(df, authors):
     # ---------this snippet for the string "added" search
     keyword_added = 'added'
@@ -154,7 +161,7 @@ def find_active_members(df, authors):
     removed_members = []
     active_members = []
     for author in left_mem + rem_members:
-        # + is a special character and you have to escape it with \
+        # + is a special character and you have to escape it with beckslash
         if author[0] == '+':
             activity = df['Message'].str.split(f'\{author}')
         else:
@@ -185,7 +192,7 @@ def find_active_members(df, authors):
                      removed_members, )
     return group_members
 
-
+@timeit
 def find_day_of_chat(df, senders):
     """[summary]
 
@@ -218,7 +225,7 @@ def find_day_of_chat(df, senders):
         sender_days[senders[sender]] = values
 
     return sender_days, group_sent_days
-
+@timeit
 def emoji_stats(data_frame, authors):
     emojies_sent_member = OrderedDict()
     for sender in authors:
@@ -235,6 +242,7 @@ def emoji_stats(data_frame, authors):
     all_emojies = dict(Counter([item for sublist in all_emojies for item in sublist]))
     return emojies_sent_member, all_emojies
 
+@timeit
 def sent_messages_over_time(df, members):
     # initialize ordereddict for maintaining order of values
     month_wise_data = OrderedDict()
@@ -268,7 +276,8 @@ def sent_messages_over_time(df, members):
     # its group activity
     group_activity = [months_list, values_list]
     return month_wise_data, group_activity
-   
+
+@timeit
 def chatting_time(df, members):
     # %%
     # individual statistics
@@ -302,7 +311,7 @@ def chatting_time(df, members):
                            'Evening(5pm-10pm)', 'Night(10pm-4am)'], [early_morning, morning, afternoon, evening, night]]
     return time_wise_data, group_chating_time
 
-
+@timeit
 def display_wordcloud(data_frame, authors):
     # delete previous generated images
     media_path = os.path.join(settings.MEDIA_ROOT, 'word_cloud_images')
