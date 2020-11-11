@@ -21,8 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'b1*1@3(f1ez5je_nai^8vh0ly()@#w4c_%^t^4kqjcj7c6!z#6'
-
+# SECRET_KEY = 'b1*1@3(f1ez5je_nai^8vh0ly()@#w4c_%^t^4kqjcj7c6!z#6'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'b1*1@3(f1ez5je_nai^8vh0ly()@#w4c_%^t^4kqjcj7c6!z#6')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -134,3 +135,10 @@ STATIC_URL = '/static/'
 STATIC_ROOT= os.path.join(BASE_DIR,'GroupChat', 'static/')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+import dj_database_url
+db_from_env = dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(db_from_env)
+# Simplified static file serving.
+# https://warehouse.python.org/project/whitenoise/
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

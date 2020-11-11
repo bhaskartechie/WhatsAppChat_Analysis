@@ -1,3 +1,4 @@
+
 # For more information, please refer to https://aka.ms/vscode-docker-python
 FROM python:3.8-slim-buster
 
@@ -9,8 +10,14 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
+
 # Install pip requirements
 ADD requirements.txt .
+RUN apk update \
+  && apk add apk add gcc libc-dev g++ \
+  && apk add libffi-dev libxml2 libffi-dev \
+  && apk add unixodbc-dev mariadb-dev python3-dev
+RUN python -m pip install psutil
 RUN python -m pip install -r requirements.txt
 
 WORKDIR /app

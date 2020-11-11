@@ -202,4 +202,17 @@ local.properties
 # Uncomment this line if you wish to ignore the project description file.
 # Typically, this file would be tracked if it contains build/dependency configurations:
 #.project
+# Text backup files
+*.bak
 
+# Database
+*.sqlite3
+
+### VisualStudioCode ###
+# .vscode/
+
+# dockerfile
+Dockerfile
+docker-compose.debug.yml
+.dockerignore
+docker-compose.yml
