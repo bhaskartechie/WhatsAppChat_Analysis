@@ -84,13 +84,16 @@ def home(request):
         # this case is for personal chat
         if len(member_stats) == 2:
             return render(request, 'groupchat/personal_chat/personal_chat.html')
-
-        first_msg = data_frame['Message'][0]
-        first_date = data_frame['Date'][0].date()
-        # get the time from data frame
-        first_time = data_frame['Date'][0].time()
-        # creator of the group member
-        creator = first_msg.split(' created group')[0]
+        # cheching for the group creation date time with group name by whom 
+        if len(data_frame['Message'][0].split(' created group')) != 1:
+            first_msg = data_frame['Message'][0]
+            first_date = data_frame['Date'][0].date()
+            # get the time from data frame
+            first_time = data_frame['Date'][0].time()
+            # creator of the group member
+            creator = first_msg.split(' created group')[0]
+        else:
+            first_msg = first_date = first_time = creator = 'Not Available !'
         # get None author data, it is special author for group operations
         none_data = data_frame[data_frame["Author"].isnull()]
         authors = data_frame.Author.unique()
@@ -117,6 +120,9 @@ def home(request):
             present_group_name = first_group_name
         else:
             present_group_name = group_names[-1][2]
+        # present group name correction
+        if first_msg == 'Not Available !':
+            first_group_name = 'Not Available !'
         # sent messages on which day of the week for each each member and whole group
         authors_days, group_days = find_day_of_chat(data_frame, authors)
         # numbers of emojies in each member sent messages
