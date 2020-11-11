@@ -1,1 +1,1 @@
-web: gunicorn locallibrary.wsgi --log-file -
+web: gunicorn WhatsAppChat_Analysis.wsgi --log-file -
