@@ -5,6 +5,8 @@ import numpy as np
 
 #  this is the global variable for calculate the average word speed of the group memeber
 avg_words = 10
+# Average typing speed in mobile, actual reference is 38
+avg_typing_speed = 25
 
 def starts_with_date_and_time(s):
     # regex pattern for date.(Works only for android. IOS Whatsapp export format is different. Will update the code soon
@@ -123,8 +125,7 @@ def chat_analysis_main(filename):
     authors = authors[authors != None]  # remove None author
 
     author_range = range(len(authors))
-    # Average typing speed in mobile, actual reference is 38
-    avg_typing_speed = 25
+    
     # individual each member data
     author_msgs = [data_frame[data_frame["Author"] == authors[writer]]
                    for writer in author_range]

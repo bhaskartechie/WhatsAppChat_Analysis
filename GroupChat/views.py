@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 import numpy as np
 from django.conf import settings
-from .chat_stats_calculations import timeit, create_local_chat_file, \
+from .chat_stats_calculations import create_local_chat_file, \
     chat_analysis_main, group_name_changes, group_dp_changes, \
     find_active_members, find_day_of_chat, emoji_stats, \
     sent_messages_over_time, chatting_time, display_wordcloud, \
@@ -69,15 +69,21 @@ def plot_group_stats(request):
 def call_footer(request):
     return render(request, 'groupchat/footer_messages.html')
 
-@timeit
+# @timeit
 def home(request):
     # import cProfile, pstats
     # profiler = cProfile.Profile()
     # profiler.enable()
+    # calculate number of visits of the site
+    num_visits = request.session.get('num_visits', 0)
+    request.session['num_visits'] = num_visits + 1
     if request.method == 'POST' and request.FILES['chat_file']:    
         chat_filename = create_local_chat_file(request.FILES['chat_file'])
         data_frame, member_stats = chat_analysis_main(
             chat_filename)
+        # this case is for personal chat
+        if len(member_stats) == 2:
+            return render(request, 'groupchat/personal_chat/personal_chat.html')
 
         first_msg = data_frame['Message'][0]
         first_date = data_frame['Date'][0].date()
@@ -159,10 +165,11 @@ def home(request):
                                                                 'dp_changes': dp_changes,
                                                                 'msg_statistics': msg_statistics,
                                                                 'group_names': group_names,
-                                                                'member_stats': member_stats, })
+                                                                'member_stats': member_stats,
+                                                                'num_visits': num_visits, })
         # 'data': data, })
 
     # else:
     #     form = UploadChatFileForm()
-    return render(request, 'base.html')
+    return render(request, 'base.html', {'num_visits': num_visits, })
 

@@ -1,0 +1,18 @@
+version: '3.4'
+
+services:
+  db:
+    image: postgres
+    environment: 
+      POSTGRES_USER: 'postgres'
+      POSTGRES_DB: 'postgres'
+      POSTGRES_PASS: '1egBre@k'
+
+  whatsappchatanalysis:
+    image: whatsappchatanalysis
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 8000:8000
+  
