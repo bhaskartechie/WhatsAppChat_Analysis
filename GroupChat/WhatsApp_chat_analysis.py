@@ -10,7 +10,7 @@ avg_typing_speed = 25
 
 def starts_with_date_and_time(s):
     # regex pattern for date.(Works only for android. IOS Whatsapp export format is different. Will update the code soon
-    pattern = '^([0-9]+)(\/)([0-9]+)(\/)([0-9][0-9]), ([0-9]+):([0-9][0-9]) (am|pm) -'
+    pattern = '^([0-9]+)(\/)([0-9]+)(\/)([0-9][0-9]), ([0-9]+):([0-9][0-9]) (am|pm|AM|PM) -'
     result = re.match(pattern, s)
     if result:
         return True
