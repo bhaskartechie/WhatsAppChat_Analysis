@@ -217,5 +217,5 @@ docker-compose.debug.yml
 .dockerignore
 docker-compose.yml
 
-# media cloud images
-media/word_cloud_images/*
+# # media cloud images
+# media/word_cloud_images/*
