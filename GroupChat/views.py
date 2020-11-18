@@ -108,21 +108,28 @@ def home(request):
         data_frame.sort_values(by='Date')
 
         # * From here functions manipulation functions are starting
-        # function to find the number changes in the group names
-        group_names = group_name_changes(none_data)
         # function to find the number changes in the group dps
         num_dp_changes, dp_last_change, dp_last_change_by = group_dp_changes(
             none_data, first_date, creator)
         
         group_members = find_active_members(none_data, authors)
-        first_group_name = group_names[0][1]
-        if len(group_names[0]) == 2:
-            present_group_name = first_group_name
-        else:
+        # function to find the number changes in the group names
+        group_names, ids = group_name_changes(none_data)
+        if ids == 1:
+            # this case is group name available but no change in group names
+            first_group_name = present_group_name = group_names[1]
+        elif ids == 2:
+            # this case has multiple group name changes
+            first_group_name = group_names[0][1]
             present_group_name = group_names[-1][2]
-        # present group name correction
-        if first_msg == 'Not Available !':
+        elif ids == 3:
+            # no groupnames available case
             first_group_name = 'Not Available !'
+            present_group_name = 'GroupNameNotAvailable'
+        else:
+            first_group_name = 'SomethingWentBad !'
+            present_group_name = 'SomethingWentBad !'
+
         # sent messages on which day of the week for each each member and whole group
         authors_days, group_days = find_day_of_chat(data_frame, authors)
         # numbers of emojies in each member sent messages
@@ -166,6 +173,7 @@ def home(request):
                                                                 'first_time': first_time,
                                                                 'first_group_name': first_group_name,
                                                                 'present_group_name': present_group_name,
+                                                                'ids': ids,
                                                                 'creator': creator,
                                                                 'group_members': group_members,
                                                                 'dp_changes': dp_changes,

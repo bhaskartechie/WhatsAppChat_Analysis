@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'b1*1@3(f1ez5je_nai^8vh0ly()@#w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['127.0.0.1', 'https://whatsappdataanalysis.herokuapp.com']
 
 
 # Application definition

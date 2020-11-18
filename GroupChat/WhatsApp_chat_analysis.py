@@ -10,7 +10,7 @@ avg_typing_speed = 25
 
 def starts_with_date_and_time(s):
     # regex pattern for date.(Works only for android. IOS Whatsapp export format is different. Will update the code soon
-    pattern = '^([0-9]+)(\/)([0-9]+)(\/)([0-9][0-9]), ([0-9]+):([0-9][0-9]) (am|pm|AM|PM) -'
+    pattern = '^([0-9]+)(\/)([0-9]+)(\/)([0-9][0-9]+), ([0-9]+):([0-9][0-9]) '
     result = re.match(pattern, s)
     if result:
         return True
@@ -52,8 +52,6 @@ def chat_analysis_main(filename):
     # Upload your file here
     conversation_path = filename  # chat file
     with open(conversation_path, encoding="utf-8") as fp:
-        # Skipping first line of the file because contains information related to something about end-to-end encryption
-        fp.readline()
         message_buffer = []
         date, time, author = None, None, None
         writer = 1
@@ -73,9 +71,15 @@ def chat_analysis_main(filename):
             else:
                 message_buffer.append(line)
         parsed_data.append([f'{date} {time}', author, ' '.join(message_buffer)])
+    
+    # Skipping first line of the file because contains information related to something about end-to-end encryption
+    # remove first row if the row is encrypted message
+    if parsed_data[0][2].find('end-to-end encrypted.') != -1:
+        parsed_data.pop(0)
     # Initializing a pandas Dataframe.
     data_frame = pd.DataFrame(parsed_data, columns=[
                               'Date', 'Author', 'Message'])
+
     data_frame["Date"] = pd.to_datetime(data_frame["Date"])
     # by default month showing as day and vice versa to eliminate apply this
     data_frame['Date'] = data_frame['Date'].dt.strftime('%d/%m/%Y %H:%M:%S')

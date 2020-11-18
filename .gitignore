@@ -218,6 +218,11 @@ docker-compose.debug.yml
 docker-compose.yml
 
 # media cloud images
+media/word_cloud_images/*
+# exclude .gitkeep for the folder purpose
+!media/word_cloud_images/.gitkeep
+# ignore chat file from the media
+media/temp_chat_file.txt
 
 # python manage.py collectstatic
 staticfiles

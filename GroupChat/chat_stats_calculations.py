@@ -65,11 +65,18 @@ def group_name_changes(df):
     # this key term used to find the changes in the group name
     key_terms = 'changed the subject from '
     data_frame = df[df["Message"].str.contains(key_terms)]
+    # returns first argument is group name changes data and second arguments are flags 
+    # 1- group name is available and no group name changes
+    # 2- group name is available and has group name changes
+    # 3- no group names is available
     if data_frame.empty:
-        def filter_groupname_nochange(s):
-            return [s[0:s.find(' created')], s[s.find(
-                'created group "') + len('created group "'):s.rfind('"')]]
-        return [df["Message"].apply(filter_groupname_nochange)[0]]
+        first_message = df.iloc[0]['Message']
+        if  first_message.find(' created group ') != -1:
+        # this is to filter first message for the group name changes
+            return [first_message[0:first_message.find(' created')], first_message[first_message.find(
+                    'created group "') + len('created group "'):first_message.rfind('"')]], 1
+        else:
+            return ['Group Name Not Available'], 3
     # filt_2 = lambda s: s[s.find(second_str_pre) + len(second_str_pre):s.rfind(second_str_post)]
 
     def filter_groupname_change(s):
@@ -84,7 +91,7 @@ def group_name_changes(df):
     temp_df = data_frame["Message"].apply(filter_groupname_change)
     # remove empty list from the none data frame
     
-    return temp_df[temp_df.astype(bool)].to_list()
+    return temp_df[temp_df.astype(bool)].to_list(), 2
 
 
 # this function finds the active and left members from the group

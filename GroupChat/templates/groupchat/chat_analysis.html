@@ -38,21 +38,22 @@
   </tr>
   {% endfor %}
 </table>
-{% if group_names|length > 1 %}
+{% if ids == 2 %}
 <h3>Group name changes({{group_names|length}})</h3>
 {% else %}
 <h3>Group name changes({{0}})</h3>
 {% endif %}
 <ul id="list_ul">
-  {% if group_names|length > 1 %} {% for grp_name in group_names %}
+  {% if ids == 2 %} {% for grp_name in group_names %}
   <li>
     <font color="#EBB828">{{grp_name.0}}</font> changed
     <font color="grey">{{grp_name.1}} </font
     ><span style="font-size: 30px; color: black">&#8680;</span
     ><font color="#8334eb">{{grp_name.2}} </font>
   </li>
-  {% endfor %} {% else %}
+  {% endfor %} {% elif ids == 1 %}
   <strong>No group name changes</strong>
+  {% else %} No group names available
   {% endif %}
   <hr style="width: 50%; text-align: left; margin-left: 0" />
   <span style="font-size: 50px; color: red">&#128247;</span
