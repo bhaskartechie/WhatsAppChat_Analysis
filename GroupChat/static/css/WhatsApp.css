@@ -206,3 +206,12 @@ ol {
   padding: 1rem;
   text-align: center;
 }
+.busy_stat {
+line-height: 1.15;
+font-family: 'Roboto', sans-serif;
+text-align: center;
+box-sizing: border-box;
+font-size: 58px;
+margin: 0 0 5px;
+color: #151515;
+}

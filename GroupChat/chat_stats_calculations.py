@@ -436,3 +436,12 @@ def calculate_each_member_stats(df, author):
     # members_stats['No_deleted'] = [list(members_stats['No_deleted'].keys()),
     #                               list(members_stats['No_deleted'].values())]                             
     return all_members_stats
+
+def busiest_day_of_chat(df):
+    high_msgs_counts = df['Date'].dt.date.value_counts()
+    busiest_day = high_msgs_counts.index[0]
+    busy_day_messages = high_msgs_counts[busiest_day]
+    total_messages = len(df[df['Author'].notnull()])
+    total_days = (df['Date'].max()-df['Date'].min()).days
+    average_messages_per_day = round(total_messages / total_days, 2)
+    return (busiest_day, busy_day_messages, average_messages_per_day, total_days)

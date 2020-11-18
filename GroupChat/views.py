@@ -6,7 +6,7 @@ from .chat_stats_calculations import create_local_chat_file, \
     chat_analysis_main, group_name_changes, group_dp_changes, \
     find_active_members, find_day_of_chat, emoji_stats, \
     sent_messages_over_time, chatting_time, display_wordcloud, \
-    calculate_each_member_stats
+    calculate_each_member_stats, busiest_day_of_chat
 
 def plot_members_stats(request, key):
     # member week days plot
@@ -68,6 +68,7 @@ def plot_group_stats(request):
 
 def call_footer(request):
     return render(request, 'groupchat/footer_messages.html')
+
 
 # @timeit
 def home(request):
@@ -142,6 +143,8 @@ def home(request):
         display_wordcloud(data_frame, authors)
         # for group graph display calculate all statistics of the group members
         members_stats = calculate_each_member_stats(data_frame, authors)
+        # calculate busiest day of the group chat
+        busy_day_stats = busiest_day_of_chat(data_frame)
         # ! save data to session to send this data graphs of which day most day
         # members statistics
         request.session['authors_days'] = authors_days
@@ -180,6 +183,7 @@ def home(request):
                                                                 'msg_statistics': msg_statistics,
                                                                 'group_names': group_names,
                                                                 'member_stats': member_stats,
+                                                                'busy_day_stats': busy_day_stats,
                                                                 'num_visits': num_visits, })
         # 'data': data, })
 

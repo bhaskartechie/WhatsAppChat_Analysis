@@ -3,7 +3,7 @@ import pandas as pd
 import emoji
 import numpy as np
 
-#  this is the global variable for calculate the average word speed of the group memeber
+#  this is the global variable for calculate the average word speed of the group member
 avg_words = 10
 # Average typing speed in mobile, actual reference is 38
 avg_typing_speed = 25
@@ -46,7 +46,6 @@ def dayofweek(day):
     return days[day]
 
 
-# ---------------- starting --------------------
 def chat_analysis_main(filename):
     parsed_data = []  # List to keep track of data so it can be used by a Pandas dataframe
     # Upload your file here
