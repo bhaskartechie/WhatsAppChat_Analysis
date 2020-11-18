@@ -442,6 +442,8 @@ def busiest_day_of_chat(df):
     busiest_day = high_msgs_counts.index[0]
     busy_day_messages = high_msgs_counts[busiest_day]
     total_messages = len(df[df['Author'].notnull()])
-    total_days = (df['Date'].max()-df['Date'].min()).days
+    grp_started_on = df['Date'].min()
+    grp_last_msg_on = df['Date'].max() 
+    total_days = (grp_last_msg_on - grp_started_on).days
     average_messages_per_day = round(total_messages / total_days, 2)
-    return (busiest_day, busy_day_messages, average_messages_per_day, total_days)
+    return (busiest_day, busy_day_messages, average_messages_per_day, grp_started_on, grp_last_msg_on, total_days)
