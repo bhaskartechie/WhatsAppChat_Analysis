@@ -445,5 +445,30 @@ def busiest_day_of_chat(df):
     grp_started_on = df['Date'].min()
     grp_last_msg_on = df['Date'].max() 
     total_days = (grp_last_msg_on - grp_started_on).days
-    average_messages_per_day = round(total_messages / total_days, 2)
+    average_messages_per_day = round(total_messages / total_days)
     return (busiest_day, busy_day_messages, average_messages_per_day, grp_started_on, grp_last_msg_on, total_days)
+
+# %%
+def personal_data_arrangement(df, mem_days, emoji_sent_member, \
+                                  each_month_data_author, author_chat_time, \
+                                  author_stats, busy_day_stats_mem):
+    arranged_data = []
+    for key, val in author_stats.items():
+        if key == 'No_msgs':
+            arranged_data.append([val[1][0], 'Sent messages', val[1][1]])
+        elif key == 'No_links':
+            arranged_data.append([val[1][0], 'Links shared', val[1][1]])
+        elif key == 'No_media':
+            arranged_data.append([val[1][0], 'Media(Pics/Video/Audio/Doc)', val[1][1]])
+        elif key == 'No_deleted':
+            arranged_data.append([val[1][0], 'Deleted', val[1][1]])
+        elif key == 'No_forward':
+            arranged_data.append([val[1][0], 'Forworded messages', val[1][1]])
+        elif key == 'No_typed':
+            arranged_data.append([val[1][0], 'Typed messages', val[1][1]])
+        elif key == 'No_emoji':
+            arranged_data.append([val[1][0], 'Sent Emojies', val[1][1]])
+        elif key == 'No_words':
+            arranged_data.append([val[1][0], 'Average Words per messages', val[1][1]])
+
+    return arranged_data

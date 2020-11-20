@@ -6,7 +6,7 @@ from .chat_stats_calculations import create_local_chat_file, \
     chat_analysis_main, group_name_changes, group_dp_changes, \
     find_active_members, find_day_of_chat, emoji_stats, \
     sent_messages_over_time, chatting_time, display_wordcloud, \
-    calculate_each_member_stats, busiest_day_of_chat
+    calculate_each_member_stats, busiest_day_of_chat, personal_data_arrangement
 
 def plot_members_stats(request, key):
     # member week days plot
@@ -76,15 +76,13 @@ def home(request):
     # profiler = cProfile.Profile()
     # profiler.enable()
     # calculate number of visits of the site
+    is_personal_chat = 0
     num_visits = request.session.get('num_visits', 0)
     request.session['num_visits'] = num_visits + 1
     if request.method == 'POST' and request.FILES['chat_file']:    
         chat_filename = create_local_chat_file(request.FILES['chat_file'])
         data_frame, member_stats = chat_analysis_main(
             chat_filename)
-        # this case is for personal chat
-        if len(member_stats) == 2:
-            return render(request, 'groupchat/personal_chat/personal_chat.html')
         # cheching for the group creation date time with group name by whom 
         if len(data_frame['Message'][0].split(' created group')) != 1:
             first_msg = data_frame['Message'][0]
@@ -105,31 +103,34 @@ def home(request):
         deleted_messages = np.sum(data_frame.isDeleted)
         media_messages = data_frame[data_frame['Message']
                                     == '<Media omitted>'].shape[0]
-        
         data_frame.sort_values(by='Date')
+        # this case is for personal chat
+        # set flag to 1 if number of authors only 2
+        if len(member_stats) == 2:
+            is_personal_chat = 1
 
         # * From here functions manipulation functions are starting
         # function to find the number changes in the group dps
-        num_dp_changes, dp_last_change, dp_last_change_by = group_dp_changes(
-            none_data, first_date, creator)
-        
-        group_members = find_active_members(none_data, authors)
-        # function to find the number changes in the group names
-        group_names, ids = group_name_changes(none_data)
-        if ids == 1:
-            # this case is group name available but no change in group names
-            first_group_name = present_group_name = group_names[1]
-        elif ids == 2:
-            # this case has multiple group name changes
-            first_group_name = group_names[0][1]
-            present_group_name = group_names[-1][2]
-        elif ids == 3:
-            # no groupnames available case
-            first_group_name = 'Not Available !'
-            present_group_name = 'GroupNameNotAvailable'
-        else:
-            first_group_name = 'SomethingWentBad !'
-            present_group_name = 'SomethingWentBad !'
+        if is_personal_chat == 0:
+            num_dp_changes, dp_last_change, dp_last_change_by = group_dp_changes(
+                none_data, first_date, creator)
+            group_members = find_active_members(none_data, authors)
+            # function to find the number changes in the group names
+            group_names, ids = group_name_changes(none_data)
+            if ids == 1:
+                # this case is group name available but no change in group names
+                first_group_name = present_group_name = group_names[1]
+            elif ids == 2:
+                # this case has multiple group name changes
+                first_group_name = group_names[0][1]
+                present_group_name = group_names[-1][2]
+            elif ids == 3:
+                # no groupnames available case
+                first_group_name = 'Not Available !'
+                present_group_name = 'GroupNameNotAvailable'
+            else:
+                first_group_name = 'SomethingWentBad !'
+                present_group_name = 'SomethingWentBad !'
 
         # sent messages on which day of the week for each each member and whole group
         authors_days, group_days = find_day_of_chat(data_frame, authors)
@@ -145,6 +146,13 @@ def home(request):
         members_stats = calculate_each_member_stats(data_frame, authors)
         # calculate busiest day of the group chat
         busy_day_stats = busiest_day_of_chat(data_frame)
+        arranged_personal_data = personal_data_arrangement(data_frame, authors_days, emoji_sent_author, \
+                                  each_month_data_member, member_chat_time, \
+                                  members_stats, busy_day_stats)
+        if is_personal_chat == 1:
+            return render(request, 'groupchat/personal_chat/personal_chat.html', {'authors': authors,
+                                                                                  'busy_day_stats':busy_day_stats,
+                                                                                  'arranged_personal_data': arranged_personal_data, })
         # ! save data to session to send this data graphs of which day most day
         # members statistics
         request.session['authors_days'] = authors_days

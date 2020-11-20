@@ -1,4 +1,16 @@
 {%extends "base.html" %} {% block content %}
-<h2>Personal chat analysis under construction, will be available soon...........</h2>
-<h2>please give group chat file ...</h2>
+<h2>{{authors.0}}   <span style="color: red;font-size:50px;">&#8596;</span>     {{authors.1}}</h2>
+<p style="color:grey; text-align: center;left:2px;line-height: 0;">(<i>{{busy_day_stats.3}} <span style="color: red;font-size: 30px">-</span> {{busy_day_stats.4}}</i>)</p></div>
+
+<table class="personal_chat_table">
+    <tbody>
+        {% for data in arranged_personal_data %}
+        <tr class="personal_chat_tr">
+            <td class="personal_chat_td" style="color: black;font-size:60px;font-weight: bold;font-family:Garamond">{{data.0}}</td>
+            <td class="personal_chat_td">{{data.1}}</td>
+            <td class="personal_chat_td" style="color: black;font-size:60px;font-weight: bold;font-family:Garamond">{{data.2}}</td>    
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
