@@ -449,9 +449,9 @@ def busiest_day_of_chat(df):
     return (busiest_day, busy_day_messages, average_messages_per_day, grp_started_on, grp_last_msg_on, total_days)
 
 # %%
-def personal_data_arrangement(df, mem_days, emoji_sent_member, \
-                                  each_month_data_author, author_chat_time, \
-                                  author_stats, busy_day_stats_mem):
+def personal_data_arrangement(authors, author_stats, mem_days, emoji_sent_member, \
+                                  each_month_data_author, author_chat_time, busy_day):
+                                  
     arranged_data = []
     for key, val in author_stats.items():
         if key == 'No_msgs':
@@ -468,7 +468,28 @@ def personal_data_arrangement(df, mem_days, emoji_sent_member, \
             arranged_data.append([val[1][0], 'Typed messages', val[1][1]])
         elif key == 'No_emoji':
             arranged_data.append([val[1][0], 'Sent Emojies', val[1][1]])
+            # get both authors sent emojies dictionaries
+            author_1 = emoji_sent_member[list(emoji_sent_member)[0]]
+            author_2 = emoji_sent_member[list(emoji_sent_member)[1]]
+            arranged_data.append([max(author_1, key=author_1.get), 'Most used Emoji', max(author_2, key=author_2.get)])
         elif key == 'No_words':
             arranged_data.append([val[1][0], 'Average Words per messages', val[1][1]])
+    
+    # most sent days of the week
+    author_1 = mem_days[list(mem_days)[0]]
+    author_2 = mem_days[list(mem_days)[1]]
+    arranged_data.append([max(author_1, key=author_1.get), 'Most sent messages on the week day', ''])
+    # time of the chat time in a day
+    author_1 = author_chat_time[list(author_chat_time)[0]]
+    author_2 = author_chat_time[list(author_chat_time)[1]]
+    arranged_data.append([max(author_1, key=author_1.get), 'Your preferred timing for messaging', ''])
+    # most messages sent month 
+    author_1 = each_month_data_author[list(each_month_data_author)[0]]
+    author_2 = each_month_data_author[list(each_month_data_author)[1]]
+    month, year = author_1[0][author_1[1].index(max(author_1[1]))]
+    arranged_data.append([f'{month}, {year}', 'Most sent messages in the month with messages:', max(author_1[1]) + max(author_2[1])])
+
+    # busiest day of both
+    arranged_data.append([busy_day[0], 'Most sent messages on the day with messages', busy_day[1]])
 
     return arranged_data

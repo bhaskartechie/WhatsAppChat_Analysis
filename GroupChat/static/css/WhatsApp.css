@@ -120,8 +120,8 @@ ol {
 .browse-container {
   left: 38%;
   top: 22%;
-  transform: translate(-50%, -50%);
-  position: absolute;
+  /* transform: translate(-50%, -50%); */
+  position: relative;
 }
 
 .upload-box {
@@ -216,32 +216,12 @@ margin: 0 0 5px;
 color: #151515;
 }
 
-
-* {
-  box-sizing: border-box;
-}
-
-/* Create two equal columns that floats next to each other */
-.column {
-  float: left;
-  width: 50%;
-  padding: 10px;
-  height: 300px; /* Should be removed. Only for demonstration */
-}
-
-/* Clear floats after the columns */
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
-}
-
 .personal_chat_table {
   border-collapse: collapse;
-  width: 45%;
-  margin-left: 400px;
-  margin-right: auto;
-  /* left: 0px; */
+  width: 50%;
+  margin-left: 50px;
+  /* margin-right: auto;
+  left: 10px; */
 
 }
 

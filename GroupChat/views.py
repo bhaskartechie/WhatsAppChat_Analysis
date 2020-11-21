@@ -146,9 +146,8 @@ def home(request):
         members_stats = calculate_each_member_stats(data_frame, authors)
         # calculate busiest day of the group chat
         busy_day_stats = busiest_day_of_chat(data_frame)
-        arranged_personal_data = personal_data_arrangement(data_frame, authors_days, emoji_sent_author, \
-                                  each_month_data_member, member_chat_time, \
-                                  members_stats, busy_day_stats)
+        arranged_personal_data = personal_data_arrangement(authors, members_stats, authors_days, emoji_sent_author, \
+                                                            each_month_data_member, member_chat_time, busy_day_stats)
         if is_personal_chat == 1:
             return render(request, 'groupchat/personal_chat/personal_chat.html', {'authors': authors,
                                                                                   'busy_day_stats':busy_day_stats,
