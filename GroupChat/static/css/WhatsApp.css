@@ -101,15 +101,15 @@ ol {
   margin:0 auto;
 }
 #submit-button {
-  width:50%;
-  height:100%;
+  width:200px;
+  height:35px;
   color: white;
   background:rgb(118, 185, 109);
   font-weight: bold; 
-  left: 150%;
+  left: 10%;
   top: 60%;
-  transform: translate(-50%, -50%);
-  position: absolute;
+  /* transform: translate(-50%, -50%); */
+  position: relative;
   border: none;
   outline: none;
 }
@@ -118,8 +118,8 @@ ol {
   cursor: pointer;
 }
 .browse-container {
-  left: 38%;
-  top: 22%;
+  left: 28%;
+  /* top: 22%;  */
   /* transform: translate(-50%, -50%); */
   position: relative;
 }
@@ -146,8 +146,8 @@ ol {
 .upload-button {
   left: 150%;
   top: 60%;
-  transform: translate(-50%, -50%);
-  position: absolute;
+  /* transform: translate(-50%, -50%); */
+  position: relative;
   color:  #438a5e;
   border: none;
   outline: none;
@@ -220,8 +220,8 @@ color: #151515;
   border-collapse: collapse;
   width: 50%;
   margin-left: 50px;
-  /* margin-right: auto;
-  left: 10px; */
+  margin-right: auto;
+  margin-left: auto;
 
 }
 
