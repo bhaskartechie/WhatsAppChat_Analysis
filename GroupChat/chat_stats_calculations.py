@@ -341,6 +341,9 @@ def display_wordcloud(data_frame, authors):
         # emoji_path = os.path.join(settings.MEDIA_ROOT, 'NotoColorEmoji.ttf')
         try:
             # word cloud calling
+            # d = path.dirname(__file__) if "__file__" in locals() else os.getcwd()
+            # font_path = path.join(d, 'fonts', 'Symbola', 'Symbola.ttf')
+            # font_path = os.path.join(settings.STATIC_ROOT, 'Symbola.ttf')
             wordcloud = WordCloud(background_color='white',
                                   width=200, height=100,  
                                   max_words=200,
